@@ -52,12 +52,12 @@ interface DetailedEmployeeData {
   company: string;
 }
 
-const COLORS = {
-  'High School': 'emerald',
-  'Bachelor\'s Degree': 'blue',
-  'Master\'s Degree': 'purple',
-  'PhD': 'amber'
-} as const;
+//const COLORS = {
+//  'High School': 'emerald',
+//  'Bachelor\'s Degree': 'blue',
+//  'Master\'s Degree': 'purple',
+//  'PhD': 'amber'
+//} as const;
 
 const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
   const [chartData, setChartData] = useState<ChartData>({
@@ -173,14 +173,13 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
   };
 
   const getBackgroundColor = (education: string, value: number) => {
-    const color = COLORS[education as keyof typeof COLORS] || 'gray';
     const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
     const index = Math.min(
       steps.length - 1,
       Math.floor((value / 100) * (steps.length - 1))
     );
     const intensity = steps[index];
-    return `bg-${color}-${intensity}`;
+    return `bg-gray-${intensity}`;
   };
 
   const getTextColor = (value: number) => {

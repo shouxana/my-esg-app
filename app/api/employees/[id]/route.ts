@@ -1,31 +1,44 @@
-// app/api/employees/[id]/route.ts
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../auth/authOptions';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// Define LogEntry interface
+interface LogEntry {
+  field: string;
+  oldValue: string | number | null;
+  newValue: string | number | null;
+}
+
+// Use Next.js 15's built-in types for API routes
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
+export async function PUT(request: NextRequest, props: Props) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+
+    if (!session?.user?.company) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const employeeId = params.id;
+    const employeeId = props.params.id;
     const body = await request.json();
 
     const formatDate = (dateString: string) => {
       if (!dateString) return null;
       const date = new Date(dateString);
       return date.toISOString().split('T')[0];
-    };s
+    };
 
     const client = await pool.connect();
     try {
-      // Start transaction
       await client.query('BEGIN');
 
-      // Get current employee data
       const currentDataResult = await client.query(
         'SELECT * FROM "Employee" WHERE employee_id = $1 AND company = $2',
         [employeeId, session.user.company]
@@ -36,43 +49,46 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
 
       const currentData = currentDataResult.rows[0];
-      const updates = [];
-      const logEntries = [];
 
-      // Format dates
+      const logEntries: LogEntry[] = [];
+      const updateValues: (string | number | null)[] = [];
+      const updateFields: string[] = [];
+      let valueIndex = 1;
+
       if (body.birth_date) body.birth_date = formatDate(body.birth_date);
       if (body.employment_date) body.employment_date = formatDate(body.employment_date);
       if (body.termination_date) body.termination_date = formatDate(body.termination_date);
 
-      // Check each field for changes and build update query
       const fields = [
-        'full_name', 'employee_mail', 'birth_date', 'employment_date',
-        'termination_date', 'position_id', 'education_id', 'marital_status_id',
-        'gender_id', 'managerial_position_id'
+        'full_name',
+        'employee_mail',
+        'birth_date',
+        'employment_date',
+        'termination_date',
+        'position_id',
+        'education_id',
+        'marital_status_id',
+        'gender_id',
+        'managerial_position_id',
       ];
 
-      const updateValues = [];
-      const updateFields = [];
-      let valueIndex = 1;
-
-      fields.forEach(field => {
+      fields.forEach((field) => {
         if (body[field] !== undefined && body[field] !== currentData[field]) {
           updateFields.push(`${field} = $${valueIndex}`);
           updateValues.push(body[field]);
           valueIndex++;
 
-          // Log the change
           logEntries.push({
             field,
             oldValue: currentData[field],
-            newValue: body[field]
+            newValue: body[field],
           });
         }
       });
 
       updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
 
-      if (updateFields.length > 1) { // > 1 because we always add updated_at
+      if (updateFields.length > 1) {
         const updateQuery = `
           UPDATE "Employee"
           SET ${updateFields.join(', ')}
@@ -80,12 +96,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           RETURNING *
         `;
 
-        const { rows } = await client.query(
-          updateQuery,
-          [...updateValues, employeeId, session.user.company]
-        );
+        const { rows } = await client.query(updateQuery, [
+          ...updateValues,
+          employeeId,
+          session.user.company,
+        ]);
 
-        // Insert log entries
         for (const entry of logEntries) {
           await client.query(
             `INSERT INTO "EmployeeUpdateLog" (
@@ -99,7 +115,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
               employeeId,
               entry.field,
               entry.oldValue?.toString(),
-              entry.newValue?.toString()
+              entry.newValue?.toString(),
             ]
           );
         }
@@ -110,7 +126,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
       await client.query('COMMIT');
       return NextResponse.json(currentData);
-      
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Database error:', error);

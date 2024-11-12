@@ -4,7 +4,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TrendingDown, TrendingUp, Minus, Loader2 } from 'lucide-react';
 import { exportEducationData, exportDetailedEducationData } from './excel-export-utils';
 import { Download, Table } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, type ButtonProps } from "@/components/ui/button";
+
+const BasicButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: string;
+  size?: string;
+}> = ({ children, className, ...props }) => (
+  <button 
+    className={`${className} px-4 py-2 rounded-md ${
+      props.variant === 'outline' ? 'border border-gray-300' : 'bg-blue-500 text-white'
+    }`}
+    {...props}
+  >
+    {children}
+  </button>
+);
 
 interface EducationChartProps {
   company: string;
@@ -234,7 +248,7 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
 
   return (
     <div className="w-full">
-      {/* Header Section */}
+      {/* Header Section - Updated to match Gender Distribution layout */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex justify-between items-center">
           <div className="space-y-1">
@@ -245,37 +259,47 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
               Company: {company.toUpperCase()}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            className={`px-4 py-2 rounded-md flex items-center gap-2 ${
+              isLoading || isDetailedDataLoading
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'border border-gray-300 hover:bg-gray-50'
+            }`}
             onClick={handleExport}
-            className="flex items-center gap-2"
             disabled={isLoading || isDetailedDataLoading}
           >
             <Download className="h-4 w-4" />
             Export Excel
-          </Button>
+          </button>
         </div>
 
-        {/* View toggle buttons */}
         <div className="flex gap-2">
-          <Button 
-            variant={viewMode === 'chart' ? 'default' : 'outline'}
-            className="flex-1"
+          <button
+            className={`px-4 py-2 rounded-md ${
+              viewMode === 'chart' 
+                ? 'bg-blue-500 text-white' 
+                : 'border border-gray-300'
+            } flex-1`}
             onClick={() => setViewMode('chart')}
           >
             Report
-          </Button>
-          <Button 
-            variant={viewMode === 'data' ? 'default' : 'outline'}
-            className="flex-1"
+          </button>
+          <button
+            className={`px-4 py-2 rounded-md ${
+              viewMode === 'data' 
+                ? 'bg-blue-500 text-white' 
+                : 'border border-gray-300'
+            } flex-1 flex items-center justify-center gap-2`}
             onClick={() => {
               setViewMode('data');
+              if (viewMode !== 'data') {
+                fetchDetailedData();
+              }
             }}
           >
-            <Table className="h-4 w-4 mr-2" />
+            <Table className="h-4 w-4" />
             Data
-          </Button>
+          </button>
         </div>
       </div>
 

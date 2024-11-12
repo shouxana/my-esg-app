@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "react-day-picker/dist/style.css";
 
 :root {
   --foreground-rgb: 0, 0, 0;

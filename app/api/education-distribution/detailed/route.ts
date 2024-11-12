@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db'; // Ensure this is correctly imported
+import pool from '@/lib/db';
 
+// Add these export configurations
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
-  const client = await pool.connect(); // Ensure pool is accessible here
+  const client = await pool.connect();
 
   const { searchParams } = new URL(request.url);
   const company = searchParams.get('company');

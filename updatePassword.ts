@@ -1,6 +1,5 @@
-// updatePassword.ts
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+const { PrismaClient } = require('@prisma/client');
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -23,11 +22,14 @@ async function updatePassword() {
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     // Update the user's password in the database
+    // Note: Using correct types based on your schema
     const updatedUser = await prisma.user.update({
-      where: { email: email },
+      where: { 
+        id: existingUser.id  // Using id as it's an Int in your schema
+      },
       data: { 
         password: hashedPassword,
-        updated_at: new Date() // Update the updated_at timestamp
+        updated_at: new Date()
       },
     });
 
@@ -39,4 +41,14 @@ async function updatePassword() {
   }
 }
 
-updatePassword();
+// Ensure Prisma is properly initialized before running
+prisma.$connect()
+  .then(() => {
+    updatePassword()
+      .catch((error) => {
+        console.error('Failed to update password:', error);
+      });
+  })
+  .catch((error) => {
+    console.error('Failed to connect to database:', error);
+  });

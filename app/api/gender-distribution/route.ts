@@ -1,44 +1,41 @@
 import { NextResponse } from 'next/server';
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  host: process.env.POSTGRES_HOST,
-  port: 5432,
-  database: process.env.POSTGRES_DATABASE,
-});
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-// Define types for formattedData
-type YearData = {
-  Male: number;
-  Female: number;
-  FemaleManagers: number;
-  MaleCount: number;
-  FemaleCount: number;
-  FemaleManagerCount: number;
-};
-
-type ManagerData = {
-  Male: number;
-  Female: number;
-  MaleCount: number;
-  FemaleCount: number;
-};
+import pool from '@/lib/db';
 
 type FormattedData = {
   years: number[];
-  data: { [year: number]: YearData };
-  managerData: { [year: number]: ManagerData };
+  data: {
+    [year: number]: {
+      Male: number;
+      Female: number;
+      FemaleManagers: number;
+      MaleCount: number;
+      FemaleCount: number;
+      FemaleManagerCount: number;
+    };
+  };
+  managerData: {
+    [year: number]: {
+      Male: number;
+      Female: number;
+      MaleCount: number;
+      FemaleCount: number;
+    };
+  };
 };
 
-export async function GET() {
-  let client;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const company = searchParams.get('company');
+
+  if (!company) {
+    return NextResponse.json(
+      { error: 'Company parameter is required' },
+      { status: 400 }
+    );
+  }
+
+  const client = await pool.connect();
   try {
-    client = await pool.connect();
     const currentYear = new Date().getFullYear();
     const years = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear];
 
@@ -48,7 +45,7 @@ export async function GET() {
       managerData: {}
     };
 
-    // Initialize each year's data and managerData
+    // Initialize data structure
     years.forEach(year => {
       formattedData.data[year] = {
         Male: 0,
@@ -81,6 +78,7 @@ export async function GET() {
           WHERE 
               EXTRACT(YEAR FROM emp.employment_date)::integer <= y.year
               AND (emp.termination_date IS NULL OR EXTRACT(YEAR FROM emp.termination_date)::integer >= y.year)
+              AND emp.company = $2
           ORDER BY emp.employee_id, year
       ),
       gender_updates AS (
@@ -92,6 +90,7 @@ export async function GET() {
               updated_at
           FROM "EmployeeUpdateLog"
           WHERE changed_field = 'gender_id'
+          AND employee_id IN (SELECT employee_id FROM "Employee" WHERE company = $2)
           ORDER BY updated_at DESC
       ),
       manager_updates AS (
@@ -103,6 +102,7 @@ export async function GET() {
               updated_at
           FROM "EmployeeUpdateLog"
           WHERE changed_field = 'managerial_position_id'
+          AND employee_id IN (SELECT employee_id FROM "Employee" WHERE company = $2)
           ORDER BY updated_at DESC
       ),
       employee_history AS (
@@ -165,11 +165,11 @@ export async function GET() {
       ORDER BY gc.year, gc.gender;
     `;
 
-    const result = await client.query(distributionQuery, [years[0]]);
+    const result = await client.query(distributionQuery, [years[0], company]);
 
     result.rows.forEach(row => {
       if (formattedData.data[row.year] && row.gender) {
-        const genderKey = row.gender as keyof YearData; // Correctly index YearData
+        const genderKey = row.gender as 'Male' | 'Female';
         formattedData.data[row.year][genderKey] = parseFloat(row.percentage || 0);
 
         if (genderKey === 'Male') {
@@ -185,11 +185,9 @@ export async function GET() {
             .filter(r => r.year === row.year)
             .reduce((sum, r) => sum + (r.manager_count || 0), 0);
 
-          if (genderKey in formattedData.managerData[row.year]) {
-            formattedData.managerData[row.year][genderKey as keyof ManagerData] = parseFloat(
-              ((row.manager_count / totalManagers) * 100).toFixed(1)
-            );
-          }
+          formattedData.managerData[row.year][genderKey] = parseFloat(
+            ((row.manager_count / totalManagers) * 100).toFixed(1)
+          );
 
           if (genderKey === 'Male') {
             formattedData.managerData[row.year].MaleCount = parseInt(row.manager_count);
@@ -200,17 +198,21 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json(formattedData);
+    return NextResponse.json({
+      ...formattedData,
+      company
+    });
   } catch (error) {
     console.error('Database Error:', error);
     return NextResponse.json(
-      {
-        error: 'Failed to fetch gender distribution',
-        details: error instanceof Error ? error.message : 'Unknown error'
+      { 
+        error: 'Failed to fetch gender distribution', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       },
       { status: 500 }
     );
   } finally {
-    if (client) client.release();
+    client.release();
   }
 }

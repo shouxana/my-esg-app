@@ -1,14 +1,6 @@
 import { NextResponse } from 'next/server';
-import { Pool } from 'pg'; // Ensure this is correctly imported
+import pool from '@/lib/db'; // Ensure this is correctly imported
 
-// Initialize the Pool instance correctly
-const pool = new Pool({
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  host: process.env.POSTGRES_HOST,
-  port: 5432,
-  database: process.env.POSTGRES_DATABASE,
-});
 
 export async function GET(request: Request) {
   const client = await pool.connect(); // Ensure pool is accessible here

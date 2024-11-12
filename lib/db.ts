@@ -1,29 +1,27 @@
 // lib/db.ts
 import { Pool } from 'pg';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const isDevelopment = process.env.NODE_ENV === 'development';
 
-export default prisma; // Make sure `prisma` is exported
+const developmentConfig = {
+  user: 'postgres',
+  password: 'admin',
+  host: 'localhost',
+  port: 5432,
+  database: 'postgres'
+};
 
-const pool = new Pool({
+const productionConfig = {
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   host: process.env.POSTGRES_HOST,
-  port: 5432,
+  port: 6543,
   database: process.env.POSTGRES_DATABASE,
-  ssl: process.env.DATABASE_SSL === 'true' ? {
+  ssl: {
     rejectUnauthorized: false
-  } : false
-});
-
-export const db = {
-  query: async (text: string, params: any[] = []) => {
-    const client = await pool.connect();
-    try {
-      return await client.query(text, params);
-    } finally {
-      client.release();
-    }
   }
 };
+
+const pool = new Pool(isDevelopment ? developmentConfig : productionConfig);
+
+export default pool;

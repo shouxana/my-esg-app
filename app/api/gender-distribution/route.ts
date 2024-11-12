@@ -36,16 +36,18 @@ export async function GET(request: Request) {
 
   const client = await pool.connect();
   try {
+    // First get current year and years array
     const currentYear = new Date().getFullYear();
     const years = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear];
 
+    // Initialize the formatted data structure
     const formattedData: FormattedData = {
       years: years,
       data: {},
       managerData: {}
     };
 
-    // Initialize data structure
+    // Initialize default values
     years.forEach(year => {
       formattedData.data[year] = {
         Male: 0,
@@ -63,23 +65,31 @@ export async function GET(request: Request) {
       };
     });
 
+    // Modified query to ensure company filtering is applied at each step
     const distributionQuery = `
       WITH last_four_years AS (
           SELECT generate_series($1, $1 + 3) AS year
       ),
+      company_employees AS (
+          SELECT employee_id, gender_id, managerial_position_id
+          FROM "Employee"
+          WHERE company = $2
+      ),
       employee_base AS (
           SELECT
-              emp.employee_id,
+              ce.employee_id,
               year,
-              emp.gender_id as current_gender_id,
-              emp.managerial_position_id as current_managerial_position_id
-          FROM "Employee" emp
+              ce.gender_id as current_gender_id,
+              ce.managerial_position_id as current_managerial_position_id
+          FROM company_employees ce
           CROSS JOIN last_four_years y
-          WHERE 
-              EXTRACT(YEAR FROM emp.employment_date)::integer <= y.year
-              AND (emp.termination_date IS NULL OR EXTRACT(YEAR FROM emp.termination_date)::integer >= y.year)
-              AND emp.company = $2
-          ORDER BY emp.employee_id, year
+          WHERE EXISTS (
+              SELECT 1 FROM "Employee" e
+              WHERE e.employee_id = ce.employee_id
+              AND EXTRACT(YEAR FROM e.employment_date)::integer <= y.year
+              AND (e.termination_date IS NULL OR EXTRACT(YEAR FROM e.termination_date)::integer >= y.year)
+          )
+          ORDER BY ce.employee_id, year
       ),
       gender_updates AS (
           SELECT 
@@ -90,7 +100,7 @@ export async function GET(request: Request) {
               updated_at
           FROM "EmployeeUpdateLog"
           WHERE changed_field = 'gender_id'
-          AND employee_id IN (SELECT employee_id FROM "Employee" WHERE company = $2)
+          AND employee_id IN (SELECT employee_id FROM company_employees)
           ORDER BY updated_at DESC
       ),
       manager_updates AS (
@@ -102,7 +112,7 @@ export async function GET(request: Request) {
               updated_at
           FROM "EmployeeUpdateLog"
           WHERE changed_field = 'managerial_position_id'
-          AND employee_id IN (SELECT employee_id FROM "Employee" WHERE company = $2)
+          AND employee_id IN (SELECT employee_id FROM company_employees)
           ORDER BY updated_at DESC
       ),
       employee_history AS (
@@ -151,7 +161,9 @@ export async function GET(request: Request) {
           GROUP BY g.gender, eh.year
       ),
       yearly_totals AS (
-          SELECT year, SUM(count) AS total FROM gender_counts GROUP BY year
+          SELECT year, SUM(count) AS total 
+          FROM gender_counts 
+          GROUP BY year
       )
       SELECT
           gc.gender,
@@ -165,7 +177,9 @@ export async function GET(request: Request) {
       ORDER BY gc.year, gc.gender;
     `;
 
+    console.log('Executing query for company:', company);
     const result = await client.query(distributionQuery, [years[0], company]);
+    console.log('Query result rows:', result.rows.length);
 
     result.rows.forEach(row => {
       if (formattedData.data[row.year] && row.gender) {

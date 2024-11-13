@@ -68,9 +68,9 @@ model Employee {
   employee_id            Int               @id @default(autoincrement())
   full_name             String
   employee_mail         String            @unique
-  birth_date            Date
-  employment_date       Date
-  termination_date      Date?
+  birth_date            DateTime
+  employment_date       DateTime
+  termination_date      DateTime?
   position_id           String
   education_id          String
   marital_status_id     String

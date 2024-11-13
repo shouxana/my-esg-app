@@ -1,14 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Add this section
-  experimental: {
-    appDir: true,
-  },
-  // Add this to prevent static generation of API routes
+  // Set standalone output
   output: 'standalone',
-  // Optional: Add this if you want to disable static generation completely
-  // for specific paths
+  // Add headers configuration
   async headers() {
     return [
       {

@@ -2,19 +2,15 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-// Initialize Prisma client with logging
 const prisma = new PrismaClient({
   log: ['error', 'warn']
 });
 
-// Export the handler with correct Next.js 13+ naming
 export async function POST(req: Request) {
   try {
-    // Parse request body
     const body = await req.json().catch(() => ({}));
     const { email, password } = body;
 
-    // Validate required fields
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -24,13 +20,21 @@ export async function POST(req: Request) {
 
     console.log('Authentication attempt for:', email);
 
-    // Find user
+    // Updated select fields to match your User model schema
     const user = await prisma.user.findFirst({
       where: {
         email: {
           equals: email,
           mode: 'insensitive'
         }
+      },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        company: true,
+        created_at: true,
+        updated_at: true
       }
     });
 
@@ -53,12 +57,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Remove sensitive data
     const { password: _, ...userWithoutPassword } = user;
 
-    // Return success response
     return NextResponse.json({
       message: 'Authentication successful',
-      user: userWithoutPassword
+      user: {
+        ...userWithoutPassword,
+        company: user.company.trim() // Ensure no whitespace in company name
+      }
     });
 
   } catch (error) {
@@ -72,16 +79,18 @@ export async function POST(req: Request) {
       { error: 'Authentication failed' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-// Add CORS headers to all responses
 export async function OPTIONS(req: Request) {
   return new NextResponse(null, {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 }

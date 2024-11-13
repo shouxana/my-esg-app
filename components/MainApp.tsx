@@ -50,6 +50,9 @@ const MainApp = () => {
   const handleLoginSuccess = (userData: UserData) => {
     setIsLoggedIn(true);
     setUserData(userData);
+    // Store in session storage
+    sessionStorage.setItem('isLoggedIn', 'true');
+    sessionStorage.setItem('userData', JSON.stringify(userData));
   };
 
   const views: Record<'environmental' | 'social' | 'governance', ViewType> = {
@@ -95,7 +98,7 @@ const MainApp = () => {
             <h1 className="text-xl font-bold text-white/90 px-2">ESG Dashboard</h1>
             {userData && (
               <div className="px-2 py-1 text-sm text-white/70">
-                <p>Company: {userData.company.toUpperCase()}</p>
+                <p>Company: {userData.company?.toUpperCase()}</p>
                 <p className="text-xs">{userData.email}</p>
               </div>
             )}

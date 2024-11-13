@@ -11,17 +11,17 @@ const developmentConfig = {
   database: 'postgres'
 };
 
+// Use a more dynamic way to handle SSL in production
 const productionConfig = {
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  host: process.env.POSTGRES_HOST,
-  port: 6543,
-  database: process.env.POSTGRES_DATABASE,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false },
 };
 
 const pool = new Pool(isDevelopment ? developmentConfig : productionConfig);
+
+// Optional: Add error logging
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
 
 export default pool;

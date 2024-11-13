@@ -1,9 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Set standalone output
   output: 'standalone',
-  // Add headers configuration
+  experimental: {
+    serverComponentsExternalPackages: ['pg'],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        pg: false,
+        pgpass: false
+      };
+    }
+    return config;
+  },
   async headers() {
     return [
       {

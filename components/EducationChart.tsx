@@ -186,15 +186,15 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
     }
   };
 
-  const getBackgroundColor = (education: string, value: number) => {
-    const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-    const index = Math.min(
-      steps.length - 1,
-      Math.floor((value / 100) * (steps.length - 1))
-    );
-    const intensity = steps[index];
-    return `bg-gray-${intensity}`;
-  };
+  //const getBackgroundColor = (education: string, value: number) => {
+  //  const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  //  const index = Math.min(
+  //    steps.length - 1,
+  //    Math.floor((value / 100) * (steps.length - 1))
+  //  );
+  //  const intensity = steps[index];
+  //  return `bg-gray-${intensity}`;
+  //};
 
   const getTextColor = (value: number) => {
     return value >= 100 ? 'text-gray-800' : 'text-gray-800';
@@ -333,17 +333,14 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
                     return (
                       <td key={`${year}-${education}-${yearIdx}`} className="p-4">
                         <div className="relative h-8 flex items-center group">
-                          <div
-                            className={`absolute h-full rounded-full transition-all duration-500 ${getBackgroundColor(
-                              education,
-                              value
-                            )}`}
-                            style={{ width: `${value}%` }}
-                          >
-                            <div className="opacity-0 group-hover:opacity-100 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity">
-                              {year}: {value.toFixed(1)}%
-                            </div>
+                        <div
+                          className="absolute h-full rounded-full transition-all duration-500"
+                          style={{ width: `${value}%` }}
+                        >
+                          <div className="opacity-0 group-hover:opacity-100 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity">
+                            {year}: {value.toFixed(1)}%
                           </div>
+                        </div>
                           <div className="relative z-10 w-full flex items-center justify-between px-2">
                             <button
                               ref={triggerButtonRef}

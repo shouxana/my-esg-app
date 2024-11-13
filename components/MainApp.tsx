@@ -21,17 +21,11 @@ const MainApp = () => {
   const [currentView, setCurrentView] = useState<'environmental' | 'social' | 'governance'>('social');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [username, setUsername] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Fetch username
-        const response = await fetch('/api/username');
-        const data = await response.json();
-        setUsername(data.username || 'User');
-
         // Check session storage
         const sessionIsLoggedIn = sessionStorage.getItem('isLoggedIn');
         const sessionUserData = sessionStorage.getItem('userData');
@@ -41,8 +35,7 @@ const MainApp = () => {
           setUserData(JSON.parse(sessionUserData));
         }
       } catch (error) {
-        console.error('Error fetching username:', error);
-        setUsername('User');
+        console.error('Error initializing app:', error);
       } finally {
         setIsLoading(false);
       }
@@ -106,7 +99,7 @@ const MainApp = () => {
           <div className="space-y-2 mb-6">
             <h1 className="text-xl font-bold text-white/90 px-2">ESG Dashboard</h1>
             <div className="px-2 py-1 text-sm text-white/70">
-              <p>{username}</p>
+              <p>{userData?.email}</p>
             </div>
           </div>
           <div className="space-y-3">

@@ -21,9 +21,20 @@ type Props = {
 export async function PUT(request: NextRequest, props: Props) {
   try {
     const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      console.log('No session found');
+      return NextResponse.json({ error: 'Unauthorized - No session' }, { status: 401 });
+    }
 
-    if (!session?.user?.company) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session.user) {
+      console.log('No user in session');
+      return NextResponse.json({ error: 'Unauthorized - No user' }, { status: 401 });
+    }
+
+    if (!session.user.company) {
+      console.log('No company in session');
+      return NextResponse.json({ error: 'Unauthorized - No company' }, { status: 401 });
     }
 
     const employeeId = props.params.id;

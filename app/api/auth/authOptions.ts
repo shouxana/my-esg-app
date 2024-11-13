@@ -19,7 +19,6 @@ declare module 'next-auth' {
       company: string;
     }
   }
-
   interface User {
     id: string;
     email: string;
@@ -34,6 +33,10 @@ declare module 'next-auth/jwt' {
   }
 }
 
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('Please provide NEXTAUTH_SECRET environment variable');
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -46,7 +49,6 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
-
         let retries = 3;
         while (retries > 0) {
           try {
@@ -82,7 +84,6 @@ export const authOptions: NextAuthOptions = {
             console.error(`Authentication attempt ${4 - retries} failed:`, error);
             retries--;
             if (retries === 0) throw error;
-            // Wait 1 second before retrying
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
@@ -110,8 +111,9 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  }
 };
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };

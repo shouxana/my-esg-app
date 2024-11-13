@@ -102,12 +102,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
 
   return (
     <div className="w-full">
-      {/* Company Information */}
-      <div className="mb-4 p-4 bg-white rounded-lg shadow">
-        <h2 className="text-lg font-semibold text-gray-700">
-          Company: {company.toUpperCase()}
-        </h2>
-      </div>
+      
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">

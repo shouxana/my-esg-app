@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Leaf, Users, Scale } from 'lucide-react';
 import SocialTabs from './SocialTabs';
 import AuthScreen from './AuthScreen';
-import Navbar from './NavBar';  // Add this import
 
 interface ViewType {
   label: string;
@@ -18,26 +17,38 @@ interface UserData {
   company: string;
 }
 
-// Define props interface for SocialTabs
-interface SocialTabsProps {
-  company?: string;
-}
-
 const MainApp = () => {
   const [currentView, setCurrentView] = useState<'environmental' | 'social' | 'governance'>('social');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);  // Add this
+  const [username, setUsername] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const sessionIsLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const sessionUserData = sessionStorage.getItem('userData');
-    
-    if (sessionIsLoggedIn === 'true' && sessionUserData) {
-      setIsLoggedIn(true);
-      setUserData(JSON.parse(sessionUserData));
-    }
-    setIsLoading(false);  // Add this
+    const initializeApp = async () => {
+      try {
+        // Fetch username
+        const response = await fetch('/api/username');
+        const data = await response.json();
+        setUsername(data.username || 'User');
+
+        // Check session storage
+        const sessionIsLoggedIn = sessionStorage.getItem('isLoggedIn');
+        const sessionUserData = sessionStorage.getItem('userData');
+        
+        if (sessionIsLoggedIn === 'true' && sessionUserData) {
+          setIsLoggedIn(true);
+          setUserData(JSON.parse(sessionUserData));
+        }
+      } catch (error) {
+        console.error('Error fetching username:', error);
+        setUsername('User');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeApp();
   }, []);
 
   const handleLogout = () => {
@@ -50,7 +61,6 @@ const MainApp = () => {
   const handleLoginSuccess = (userData: UserData) => {
     setIsLoggedIn(true);
     setUserData(userData);
-    // Store in session storage
     sessionStorage.setItem('isLoggedIn', 'true');
     sessionStorage.setItem('userData', JSON.stringify(userData));
   };
@@ -76,7 +86,7 @@ const MainApp = () => {
     },
   };
 
-  if (isLoading) {  // Add this loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-gray-600">Loading...</div>
@@ -90,18 +100,14 @@ const MainApp = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-
       {/* Sidebar */}
       <div className="w-64 bg-slate-800 text-white p-6 flex flex-col h-full">
         <div className="flex-1">
           <div className="space-y-2 mb-6">
             <h1 className="text-xl font-bold text-white/90 px-2">ESG Dashboard</h1>
-            {userData && (
-              <div className="px-2 py-1 text-sm text-white/70">
-                <p>Company: {userData.company?.toUpperCase()}</p>
-                <p className="text-xs">{userData.email}</p>
-              </div>
-            )}
+            <div className="px-2 py-1 text-sm text-white/70">
+              <p>{username}</p>
+            </div>
           </div>
           <div className="space-y-3">
             {Object.entries(views).map(([key, view]) => {

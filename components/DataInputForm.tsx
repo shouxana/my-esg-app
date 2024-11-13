@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as XLSX from 'xlsx-js-style';
 import { Upload } from 'lucide-react';
 import ColumnMappingModal from '../components/ColumnMappingModal';
 import EmployeeUpdateLogModal from './EmployeeUpdateLogModal';
 import { ColumnMapping } from '@/types/column-mapping';
+
 
 
 interface DataInputFormProps {
@@ -248,6 +249,7 @@ const handleUpdateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSel
 };
 
 const handleEmployeeSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  e.preventDefault();
   const employeeId = e.target.value;
   
   if (!employeeId) {
@@ -607,54 +609,76 @@ const handleMappedDataImport = async (mappings: ColumnMapping[], data: any[]) =>
 
       {/* Update Employee Data Section */}
       <div ref={updateSectionRef} className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Update Employee Data</h2>
-        <form 
-          onSubmit={handleUpdateSubmit} 
-          className="bg-yellow-50 rounded-lg p-6"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
+  <h2 className="text-2xl font-bold text-gray-800 mb-6">Update Employee Data</h2>
+  <form 
+    onSubmit={handleUpdateSubmit} 
+    className="bg-yellow-50 rounded-lg p-6"
+  >
+    <div className="mb-6">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Select Employee
+      </label>
+      <div className="relative">
+        <select
+          value={selectedEmployee}
+          onChange={(e) => {
+            e.preventDefault();
+            const scrollPos = window.scrollY;
+            const selectedId = e.target.value;
+            setSelectedEmployee(selectedId);
+            if (selectedId) {
+              fetch(`/api/employees?id=${selectedId}&company=${encodeURIComponent(company)}`)
+                .then(response => response.json())
+                .then(employee => {
+                  setUpdateFormData({
+                    full_name: employee.full_name || '',
+                    employee_mail: employee.employee_mail || '',
+                    birth_date: formatDate(employee.birth_date),
+                    employment_date: formatDate(employee.employment_date),
+                    termination_date: formatDate(employee.termination_date),
+                    position_id: employee.position_id || '',
+                    education_id: employee.education_id || '',
+                    marital_status_id: employee.marital_status_id || '',
+                    gender_id: employee.gender_id || '',
+                    managerial_position_id: employee.managerial_position_id || '',
+                    company: employee.company || company
+                  });
+                  window.scrollTo(0, scrollPos);
+                })
+                .catch(error => {
+                  console.error('Error fetching employee details:', error);
+                  alert('Failed to fetch employee details');
+                });
+            } else {
+              setUpdateFormData({
+                full_name: '',
+                employee_mail: '',
+                birth_date: '',
+                employment_date: '',
+                termination_date: '',
+                position_id: '',
+                education_id: '',
+                marital_status_id: '',
+                gender_id: '',
+                managerial_position_id: '',
+                company: company
+              });
             }
           }}
+          disabled={isLoading}
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500"
         >
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Employee
-            </label>
-            <div 
-              onClick={(e) => e.stopPropagation()} 
-              onKeyDown={(e) => e.preventDefault()}
-              tabIndex={-1}  // Add this
-              className="relative" // Add this
-            >
-              <select
-                value={selectedEmployee}
-                onChange={(e) => {
-                  e.preventDefault();
-                  const scrollPosition = window.scrollY;
-                  handleEmployeeSelect(e).then(() => {
-                    setTimeout(() => {
-                      window.scrollTo(0, scrollPosition);
-                    }, 0);
-                  });
-                }}
-                disabled={isLoading}
-                onClick={(e) => e.stopPropagation()}
-                onFocus={(e) => e.preventDefault()}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500"
-              >
-                <option value="">Select an employee</option>
-                {employees
-                  .filter(employee => employee.company === company)
-                  .map((employee) => (
-                    <option key={employee.employee_id} value={employee.employee_id}>
-                      {employee.full_name} (ID: {employee.employee_id})
-                    </option>
-                  ))}
-              </select>
-              {isLoading && <div className="text-sm text-gray-500 mt-2">Loading employee details...</div>}
-            </div>
-          </div>
+          <option value="">Select an employee</option>
+          {employees
+            .filter(employee => employee.company === company)
+            .map((employee) => (
+              <option key={employee.employee_id} value={employee.employee_id}>
+                {employee.full_name} (ID: {employee.employee_id})
+              </option>
+            ))}
+        </select>
+      </div>
+    </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
@@ -729,7 +753,7 @@ const handleMappedDataImport = async (mappings: ColumnMapping[], data: any[]) =>
               View Change Log
             </button>
             <button
-              type="submit"
+              type="button"
               disabled={!selectedEmployee || isLoading}
               className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50"
             >

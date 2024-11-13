@@ -3,10 +3,10 @@ import * as XLSX from 'xlsx-js-style';
 import pool from '@/lib/db';
 
 
-function formatDateForPostgres(dateString: string | null): string | null {
-  if (!dateString) return null;
+function formatDateForPostgres(dateNumber: number | string | null): string | null {
+  if (!dateNumber) return null;
   try {
-    const date = new Date(dateString);
+    const date = typeof dateNumber === 'number' ? XLSX.SSF.parse_date_code(dateNumber) : new Date(dateNumber);
     if (isNaN(date.getTime())) return null;
     return date.toISOString();
   } catch (error) {

@@ -1,8 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../auth/authOptions';
 
 // Define LogEntry interface
 interface LogEntry {
@@ -11,7 +9,6 @@ interface LogEntry {
   newValue: string | number | null;
 }
 
-// Use Next.js 15's built-in types for API routes
 type Props = {
   params: {
     id: string;
@@ -20,23 +17,6 @@ type Props = {
 
 export async function PUT(request: NextRequest, props: Props) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session) {
-      console.log('No session found');
-      return NextResponse.json({ error: 'Unauthorized - No session' }, { status: 401 });
-    }
-
-    if (!session.user) {
-      console.log('No user in session');
-      return NextResponse.json({ error: 'Unauthorized - No user' }, { status: 401 });
-    }
-
-    if (!session.user.company) {
-      console.log('No company in session');
-      return NextResponse.json({ error: 'Unauthorized - No company' }, { status: 401 });
-    }
-
     const employeeId = props.params.id;
     const body = await request.json();
 
@@ -52,7 +32,7 @@ export async function PUT(request: NextRequest, props: Props) {
 
       const currentDataResult = await client.query(
         'SELECT * FROM "Employee" WHERE employee_id = $1 AND company = $2',
-        [employeeId, session.user.company]
+        [employeeId, body.company]
       );
 
       if (currentDataResult.rows.length === 0) {
@@ -110,7 +90,7 @@ export async function PUT(request: NextRequest, props: Props) {
         const { rows } = await client.query(updateQuery, [
           ...updateValues,
           employeeId,
-          session.user.company,
+          body.company,
         ]);
 
         for (const entry of logEntries) {

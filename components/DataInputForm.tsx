@@ -386,6 +386,8 @@ const handleUpdateSubmit = async (e: React.FormEvent) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', 
+      cache: 'no-store',
       body: JSON.stringify(formattedData)
     });
 

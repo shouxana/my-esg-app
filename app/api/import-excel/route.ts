@@ -2,66 +2,113 @@ import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx-js-style';
 import pool from '@/lib/db';
 
-
-function formatDateForPostgres(dateNumber: number | string | null): string | null {
-  if (!dateNumber) return null;
+function extractCompanyFromEmail(email: string): string | null {
   try {
-    const date = typeof dateNumber === 'number' ? XLSX.SSF.parse_date_code(dateNumber) : new Date(dateNumber);
-    if (isNaN(date.getTime())) return null;
-    return date.toISOString();
+    const match = email.match(/@([^.]+)\./);
+    return match ? match[1] : null;
   } catch (error) {
+    console.error('Error extracting company from email:', error);
     return null;
   }
 }
 
-// Define the expected structure of Excel rows
-interface EmployeeRow {
-  full_name: string;
-  employee_mail: string;
-  birth_date?: string;
-  employment_date?: string;
-  termination_date?: string;
-  position_id?: string;
-  education_id?: string;
-  marital_status_id?: string;
-  gender_id?: string;
-  managerial_position_id?: string;
+function formatDateForPostgres(dateValue: number | string | null): string | null {
+  if (!dateValue) return null;
+  
+  try {
+    // If it's an ISO date string or already has the correct format
+    if (typeof dateValue === 'string') {
+      // If it's already an ISO string
+      if (dateValue.includes('T')) {
+        return dateValue.split('T')[0];
+      }
+      // If it's already in YYYY-MM-DD format
+      if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return dateValue;
+      }
+    }
+    
+    // If it's a number (Excel serial number)
+    if (typeof dateValue === 'number') {
+      const date = new Date(Date.UTC(1899, 11, 30 + Math.floor(dateValue)));
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    }
+    
+    // For any other format, try to create a date object
+    const date = new Date(dateValue);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+    
+    console.error('Invalid date value:', dateValue);
+    return null;
+  } catch (error) {
+    console.error('Date parsing error:', { dateValue, error });
+    return null;
+  }
 }
 
 export async function POST(request: Request) {
   const client = await pool.connect();
   try {
-    const data = await request.formData();
-    const file = data.get('file');
-
+    console.log('Starting file import process');
+    
+    const formData = await request.formData();
+    const file = formData.get('file');
+    
     if (!file || !(file instanceof Blob)) {
-      return NextResponse.json({ error: 'Invalid file uploaded' }, { status: 400 });
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    // Convert Blob to ArrayBuffer
+    // Read the Excel file
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+    const workbook = XLSX.read(new Uint8Array(buffer), {
+      type: 'array',
+      cellDates: true,
+      dateNF: 'yyyy-mm-dd',
+      raw: true
+    });
 
-    if (!workbook.SheetNames.length) {
-      return NextResponse.json({ error: 'Excel file is empty' }, { status: 400 });
-    }
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+      raw: true,
+      dateNF: 'yyyy-mm-dd',
+      defval: null
+    });
 
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    const jsonData = XLSX.utils.sheet_to_json<EmployeeRow>(worksheet); // Type the sheet rows
-
-    if (!Array.isArray(jsonData) || !jsonData.length) {
-      return NextResponse.json({ error: 'No data found in Excel file' }, { status: 400 });
-    }
-
-    // Start a transaction
+    // Start transaction
     await client.query('BEGIN');
 
     const insertedEmployees = [];
     for (const row of jsonData) {
-      // Validate required fields
+      // Basic validation
       if (!row.full_name || !row.employee_mail) {
-        throw new Error('Missing required fields: Employee Name or Employee Email');
+        throw new Error(`Missing required fields for row: ${JSON.stringify(row)}`);
+      }
+
+      // Extract company from email
+      const company = extractCompanyFromEmail(row.employee_mail);
+      if (!company) {
+        throw new Error(`Could not extract company from email: ${row.employee_mail}`);
+      }
+
+      // Format dates
+      const birthDate = formatDateForPostgres(row.birth_date);
+      const employmentDate = formatDateForPostgres(row.employment_date);
+      const terminationDate = formatDateForPostgres(row.termination_date);
+
+      if (!birthDate || !employmentDate) {
+        throw new Error(`Invalid or missing required dates for employee ${row.full_name}. Birth date and employment date are required.`);
+      }
+      
+      // Handle managerial position
+      let managerialPosition = '2'; // Default to 'No'
+      if (row.managerial_position_id) {
+        managerialPosition = typeof row.managerial_position_id === 'string' 
+          ? (row.managerial_position_id.toLowerCase() === 'yes' ? '1' : '2')
+          : (row.managerial_position_id === 1 ? '1' : '2');
       }
 
       // Insert employee
@@ -77,28 +124,29 @@ export async function POST(request: Request) {
           marital_status_id,
           gender_id,
           managerial_position_id,
+          company,
           created_at,
           updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *`,
         [
           row.full_name,
           row.employee_mail,
-          formatDateForPostgres(row.birth_date || null),
-          formatDateForPostgres(row.employment_date || null),
-          formatDateForPostgres(row.termination_date || null),
+          birthDate,
+          employmentDate,
+          terminationDate,
           row.position_id || null,
           row.education_id || null,
           row.marital_status_id || null,
           row.gender_id || null,
-          row.managerial_position_id === '1' ? '1' : '2'
+          managerialPosition,
+          company
         ]
       );
-
+      
       insertedEmployees.push(rows[0]);
     }
 
-    // Commit the transaction
     await client.query('COMMIT');
 
     return NextResponse.json({
@@ -107,20 +155,17 @@ export async function POST(request: Request) {
       count: insertedEmployees.length
     });
 
-  } catch (error: any) {
-    // Rollback in case of error
+  } catch (error) {
     await client.query('ROLLBACK');
-    
     console.error('Import error:', error);
     return NextResponse.json(
       { 
-        error: 'Failed to import data',
+        error: 'Failed to import data', 
         details: error instanceof Error ? error.message : 'Unknown error'
       }, 
       { status: 500 }
     );
   } finally {
-    // Always release the client back to the pool
     client.release();
   }
 }

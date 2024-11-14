@@ -38,7 +38,7 @@ export async function GET(request: Request) {
                   ELSE 'Terminated'
               END as status,
               emp.birth_date,
-              mp.managerial_position = 'Yes' as is_manager,
+              mp.managerial_position = 'Y' as is_manager,
               year
           FROM "Employee" emp
           CROSS JOIN last_four_years y

@@ -427,72 +427,78 @@ const handleExcelImport = (e: React.ChangeEvent<HTMLInputElement>) => {
 const handleMappedDataImport = async (mappings: ColumnMapping[], data: any[]) => {
   setIsLoading(true);
   try {
+    // Transform the data
     const transformedData = data.map(row => {
-      const transformedRow: any = { company };
+      const transformedRow: any = {};
+      
       mappings.forEach(mapping => {
-        if (mapping.excelColumn) {
+        if (mapping.excelColumn && row[mapping.excelColumn] !== undefined) {
           let value = row[mapping.excelColumn];
           
-          switch (mapping.dataType) {
-            case 'date':
-              value = value ? new Date(value).toISOString().split('T')[0] : null;
-              break;
-            case 'datetime':
-              value = value ? new Date(value).toISOString() : null;
-              break;
-            case 'number':
-              value = value ? Number(value) : null;
-              break;
-            case 'boolean':
-              value = value === 'Yes' ? '1' : '2';
-              break;
-            }
-            transformedRow[mapping.dbColumn] = value;
+          // Handle special case for managerial position
+          if (mapping.dbColumn === 'managerial_position_id') {
+            value = value?.toString().toLowerCase() === 'yes' ? '1' : '2';
           }
-        });
-        return transformedRow;
+          // Handle null/undefined values
+          else if (value === null || value === undefined || value === '') {
+            value = null;
+          }
+          // Don't transform dates here - send raw values to the API
+          transformedRow[mapping.dbColumn] = value;
+        }
       });
+      
+      return transformedRow;
+    });
 
-      const formData = new FormData();
-      formData.append('data', JSON.stringify(transformedData));
-      formData.append('company', company);
-
-      const response = await fetch('/api/import-excel', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to import data');
-      }
-
-      const result = await response.json();
-      alert(`Successfully imported ${result.count} employees`);
-      await refreshEmployees();
-    } catch (error) {
-      console.error('Error importing data:', error);
-      alert('Failed to import data: ' + (error as Error).message);
-    } finally {
-      setIsLoading(false);
-      setIsColumnMappingOpen(false);
-      setSelectedFile(null);
+    // Create a new FormData instance
+    const formData = new FormData();
+    // Append the file itself
+    if (selectedFile) {
+      formData.append('file', selectedFile);
     }
-  };
+
+     // Add company to the formData
+     formData.append('company', company); // This is from your props
+
+    // Send the file to the API
+    const response = await fetch('/api/import-excel', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to import data');
+    }
+
+    const result = await response.json();
+    alert(`Successfully imported ${result.count} employees`);
+    await refreshEmployees();
+  } catch (error) {
+    console.error('Error importing data:', error);
+    alert('Failed to import data: ' + (error as Error).message);
+  } finally {
+    setIsLoading(false);
+    setIsColumnMappingOpen(false);
+    setSelectedFile(null);
+  }
+};
 
   const downloadExcelTemplate = () => {
+    // Create the template data
     const template = [
       {
         'full_name': '',
         'employee_mail': '',
-        'birth_date': 'YYYY-MM-DD',
-        'employment_date': 'YYYY-MM-DD',
-        'termination_date': 'YYYY-MM-DD',
+        'birth_date': '',
+        'employment_date': '',
+        'termination_date': '',
         'position_id': '',
         'education_id': '',
         'marital_status_id': '',
         'gender_id': '',
-        'managerial_position_id': 'Yes/No',
+        'managerial_position_id': '',
       },
     ];
 

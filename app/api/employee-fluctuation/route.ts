@@ -61,7 +61,7 @@ export async function GET(request: Request) {
           SELECT
               emp.employee_id,
               EXTRACT(YEAR FROM AGE(MAKE_DATE(y.year, 12, 31), emp.birth_date)) as age_at_year,
-              mp.managerial_position = 'Y' as is_manager,
+              mp.managerial_position = 'Yes' as is_manager,
               EXTRACT(YEAR FROM emp.employment_date)::integer = y.year as joined_in_year,
               EXTRACT(YEAR FROM emp.termination_date)::integer = y.year as left_in_year,
               y.year

@@ -5,6 +5,7 @@ import { FormInput, BarChart2 } from 'lucide-react';
 import DataInputForm from './DataInputForm';
 import EducationChart from './EducationChart';
 import GenderDistributionChart from './GenderDistributionChart';
+import EmployeeFluctuationChart from './EmployeeFluctuationChart';
 
 interface TabType {
   label: string;
@@ -137,6 +138,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
           <div className="space-y-6">
             <EducationChart company={company} />
             <GenderDistributionChart years={years} company={company} />
+            <EmployeeFluctuationChart company={company} />
           </div>
         )}
         {activeTab === 'visuals' && isLoading && (

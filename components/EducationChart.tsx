@@ -486,11 +486,11 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
                           <td className="px-3 py-1 text-center text-gray-600">
                             {employee.employment_date}
                           </td>
-                          <td className={`px-3 py-1 text-center ${
-                            !employee.termination_date ? 'text-green-600 font-medium' : 'text-gray-600'
-                          }`}>
-                            {employee.termination_date || 'Active'}
-                          </td>
+                          <td className={`px-4 py-1 text-center ${
+                          !employee.termination_date ? 'text-green-600' : 'text-gray-600'
+                        }`}>
+                          {employee.termination_date || 'Active'}
+                        </td>
                         </tr>
                       ))}
                     </tbody>

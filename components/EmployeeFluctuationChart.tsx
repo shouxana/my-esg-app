@@ -15,13 +15,15 @@ interface ChartData {
 }
 
 interface DetailedEmployee {
-  employee_id: string;
-  full_name: string;
-  employment_date: string;
-  status: string;
-  age_at_year: number;
-  is_manager: boolean;
-}
+    employee_id: string;
+    full_name: string;
+    employment_date: string;
+    status: string;
+    age_in_year: string;     // Changed to string to match API
+    age_at_year: number;     // Added for compatibility
+    is_manager: boolean;
+    age_category: string;
+  }
 
 interface DetailedFluctuationData {
   employee_id: number;
@@ -72,6 +74,7 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
           throw new Error('Failed to fetch detailed data');
         }
         const data = await response.json();
+        console.log('API Response:', data);  // To see the API data
         if (Array.isArray(data)) {
           setDetailedData(data);
         } else {
@@ -151,9 +154,14 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
         setError(null);
       
         try {
-          const response = await fetch(
-            `/api/employee-fluctuation/detailed?company=${encodeURIComponent(company)}&year=${year}&category=${encodeURIComponent(category)}`
-          );
+            const response = await fetch(
+              `/api/employee-fluctuation-popup?` + 
+              new URLSearchParams({
+                year: year.toString(),
+                category: category,
+                company: company
+              })
+            );
           
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -376,81 +384,87 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
       )}
 
 {isPopupOpen && (
-        <div
-          ref={modalRef}
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={() => setIsPopupOpen(false)}
-          tabIndex={-1}
-        >
-          <div
-            className="bg-white rounded-lg p-6 w-[800px] max-w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">
-                Employees in category {selectedCategory} for {selectedYear}
-              </h2>
-              <div className="text-sm text-gray-500">
-                Company: {company.toUpperCase()}
-              </div>
-            </div>
-
-            {isEmployeeDataLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-              </div>
-            ) : employeeData && employeeData.length > 0 ? (
-              <div className="max-h-[400px] overflow-y-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                        Employee
-                      </th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
-                        Employment Date
-                      </th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {employeeData.map((employee) => (
-                      <tr 
-                        key={employee.employee_id}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="px-3 py-1">
-                          {employee.full_name}
-                        </td>
-                        <td className="px-3 py-1 text-center text-gray-600">
-                          {employee.employment_date}
-                        </td>
-                        <td className={`px-4 py-1 text-center ${
-                          employee.status === 'Active' ? 'text-green-600' : 'text-gray-600'
-                        }`}>
-                          {employee.status}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-center text-gray-500">
-                No employees found in this category.
-              </p>
-            )}
-            <button
-              className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-              onClick={() => setIsPopupOpen(false)}
-            >
-              Close
-            </button>
-          </div>
+  <div
+    ref={modalRef}
+    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+    onClick={() => setIsPopupOpen(false)}
+    tabIndex={-1}
+  >
+    <div
+      className="bg-white rounded-lg p-6 w-[800px] max-w-full"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">
+          Employees in category {selectedCategory} for {selectedYear}
+        </h2>
+        <div className="text-sm text-gray-500">
+          Company: {company.toUpperCase()}
         </div>
+      </div>
+
+      {isEmployeeDataLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      ) : employeeData && employeeData.length > 0 ? (
+        <div className="max-h-[400px] overflow-y-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 sticky top-0">
+              <tr>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                  Employee
+                </th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
+                  Employment Date
+                </th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
+                  Status
+                </th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
+                  Age
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {employeeData.map((employee) => (
+                <tr 
+                  key={employee.employee_id}
+                  className="hover:bg-gray-50"
+                >
+                  <td className="px-3 py-1">
+                    {employee.full_name}
+                  </td>
+                  <td className="px-3 py-1 text-center text-gray-600">
+                    {employee.employment_date}
+                  </td>
+                  <td className={`px-4 py-1 text-center ${
+                    employee.status === 'Active' ? 'text-green-600' : 'text-gray-600'
+                  }`}>
+                    {employee.status}
+                  </td>
+                  <td className="px-4 py-1 text-center text-gray-600">
+                    {employee.age_in_year}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-center text-gray-500">
+          No employees found in this category.
+        </p>
       )}
+      <button
+        className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+        onClick={() => setIsPopupOpen(false)}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 };

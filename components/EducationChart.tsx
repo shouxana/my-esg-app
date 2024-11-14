@@ -404,7 +404,7 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
                       className={`hover:bg-gray-50 ${hasChanges ? 'bg-yellow-50' : ''}`}
                     >
                       <td className="px-4 py-1 sticky left-0 bg-inherit">
-                        {employee.full_name}
+                      ID {employee.employee_id}: {employee.full_name}
                       </td>
                       <td className="px-4 py-1 text-center text-gray-600">
                         {employee.employment_date}

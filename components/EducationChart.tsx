@@ -53,17 +53,15 @@ interface Employee {
   managerial_position_id: string;
   company: string;
 }
-interface DetailedEmployeeData {
-  employee_id: number;
+interface DetailedFluctuationData {
+  employee_id: string;
   full_name: string;
   employment_date: string;
-  termination_date: string | null;  // Add this line
   status: string;
-  education_2021: string;
-  education_2022: string;
-  education_2023: string;
-  education_2024: string;
-  company: string;
+  age_group_2021: string;
+  age_group_2022: string;
+  age_group_2023: string;
+  age_group_2024: string;
 }
 
 //const COLORS = {

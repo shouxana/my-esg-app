@@ -2,7 +2,6 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
-// Define LogEntry interface
 interface LogEntry {
   field: string;
   oldValue: string | number | null;
@@ -20,18 +19,43 @@ export async function PUT(request: NextRequest, props: Props) {
     const employeeId = props.params.id;
     const body = await request.json();
 
-    const formatDate = (dateString: string) => {
+    const formatDateForComparison = (date: string | Date | null) => {
+      if (!date) return null;
+      // Simply get YYYY-MM-DD part
+      return date.toString().split('T')[0].split(' ')[0];
+    };
+
+    const formatDateForDB = (dateString: string) => {
       if (!dateString) return null;
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0];
+      // Ensure consistent date format for DB
+      return dateString.split('T')[0].split(' ')[0];
     };
 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
+      // Use TO_CHAR for consistent date formatting in the SELECT
       const currentDataResult = await client.query(
-        'SELECT * FROM "Employee" WHERE employee_id = $1 AND company = $2',
+        `SELECT 
+          employee_id,
+          full_name,
+          employee_mail,
+          TO_CHAR(birth_date, 'YYYY-MM-DD') as birth_date,
+          TO_CHAR(employment_date, 'YYYY-MM-DD') as employment_date,
+          TO_CHAR(termination_date, 'YYYY-MM-DD') as termination_date,
+          TO_CHAR(leave_date_start, 'YYYY-MM-DD') as leave_date_start,
+          TO_CHAR(leave_date_end, 'YYYY-MM-DD') as leave_date_end,
+          position_id,
+          education_id,
+          marital_status_id,
+          gender_id,
+          managerial_position_id,
+          company,
+          created_at,
+          updated_at
+        FROM "Employee" 
+        WHERE employee_id = $1 AND company = $2`,
         [employeeId, body.company]
       );
 
@@ -46,16 +70,10 @@ export async function PUT(request: NextRequest, props: Props) {
       const updateFields: string[] = [];
       let valueIndex = 1;
 
-      if (body.birth_date) body.birth_date = formatDate(body.birth_date);
-      if (body.employment_date) body.employment_date = formatDate(body.employment_date);
-      if (body.termination_date) body.termination_date = formatDate(body.termination_date);
-
-      const fields = [
+      const dateFields = ['birth_date', 'employment_date', 'termination_date', 'leave_date_start', 'leave_date_end'];
+      const regularFields = [
         'full_name',
         'employee_mail',
-        'birth_date',
-        'employment_date',
-        'termination_date',
         'position_id',
         'education_id',
         'marital_status_id',
@@ -63,7 +81,29 @@ export async function PUT(request: NextRequest, props: Props) {
         'managerial_position_id',
       ];
 
-      fields.forEach((field) => {
+      // Handle date fields
+      dateFields.forEach((field) => {
+        if (body[field] !== undefined) {
+          const currentDateStr = formatDateForComparison(currentData[field]);
+          const newDateStr = formatDateForComparison(body[field]);
+
+          if (newDateStr !== currentDateStr) {
+            // For dates, use PostgreSQL's date type casting
+            updateFields.push(`${field} = $${valueIndex}::date`);
+            updateValues.push(formatDateForDB(body[field]));
+            valueIndex++;
+
+            logEntries.push({
+              field,
+              oldValue: currentDateStr,
+              newValue: newDateStr,
+            });
+          }
+        }
+      });
+
+      // Handle regular fields
+      regularFields.forEach((field) => {
         if (body[field] !== undefined && body[field] !== currentData[field]) {
           updateFields.push(`${field} = $${valueIndex}`);
           updateValues.push(body[field]);
@@ -80,11 +120,28 @@ export async function PUT(request: NextRequest, props: Props) {
       updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
 
       if (updateFields.length > 1) {
+        // Use TO_CHAR in the RETURNING clause for consistent date formatting
         const updateQuery = `
           UPDATE "Employee"
           SET ${updateFields.join(', ')}
           WHERE employee_id = $${valueIndex} AND company = $${valueIndex + 1}
-          RETURNING *
+          RETURNING 
+            employee_id,
+            full_name,
+            employee_mail,
+            TO_CHAR(birth_date, 'YYYY-MM-DD') as birth_date,
+            TO_CHAR(employment_date, 'YYYY-MM-DD') as employment_date,
+            TO_CHAR(termination_date, 'YYYY-MM-DD') as termination_date,
+            TO_CHAR(leave_date_start, 'YYYY-MM-DD') as leave_date_start,
+            TO_CHAR(leave_date_end, 'YYYY-MM-DD') as leave_date_end,
+            position_id,
+            education_id,
+            marital_status_id,
+            gender_id,
+            managerial_position_id,
+            company,
+            created_at,
+            updated_at
         `;
 
         const { rows } = await client.query(updateQuery, [
@@ -93,6 +150,7 @@ export async function PUT(request: NextRequest, props: Props) {
           body.company,
         ]);
 
+        // Log the changes
         for (const entry of logEntries) {
           await client.query(
             `INSERT INTO "EmployeeUpdateLog" (
@@ -105,8 +163,8 @@ export async function PUT(request: NextRequest, props: Props) {
             [
               employeeId,
               entry.field,
-              entry.oldValue?.toString(),
-              entry.newValue?.toString(),
+              entry.oldValue?.toString() || '',
+              entry.newValue?.toString() || '',
             ]
           );
         }

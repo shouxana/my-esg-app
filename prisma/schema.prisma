@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,7 +11,6 @@ model Gender {
   gender_id   String     @id
   gender      String
   employees   Employee[]
-
   @@map("Gender")
 }
 
@@ -22,7 +18,6 @@ model Education {
   education_id String     @id
   education    String
   employees    Employee[]
-
   @@map("Education")
 }
 
@@ -30,7 +25,6 @@ model MaritalStatus {
   marital_status_id String     @id
   marital_status    String
   employees         Employee[]
-
   @@map("MaritalStatus")
 }
 
@@ -38,7 +32,6 @@ model Position {
   position_id String     @id
   position    String
   employees   Employee[]
-
   @@map("Position")
 }
 
@@ -46,7 +39,6 @@ model ManagerialPosition {
   managerial_position_id String     @id
   managerial_position    String
   employees              Employee[]
-
   @@map("ManagerialPosition")
 }
 
@@ -58,9 +50,7 @@ model EmployeeUpdateLog {
   old_value     String
   new_value     String
   updated_at    DateTime @default(now())
-
   employee      Employee @relation(fields: [employee_id], references: [employee_id])
-
   @@map("EmployeeUpdateLog")
 }
 
@@ -71,6 +61,8 @@ model Employee {
   birth_date            DateTime
   employment_date       DateTime
   termination_date      DateTime?
+  leave_date_start      DateTime?         // New field
+  leave_date_end        DateTime?         // New field
   position_id           String
   education_id          String
   marital_status_id     String
@@ -79,14 +71,12 @@ model Employee {
   company               String
   created_at            DateTime          @default(now())
   updated_at            DateTime          @updatedAt
-
   position            Position          @relation(fields: [position_id], references: [position_id])
   education           Education         @relation(fields: [education_id], references: [education_id])
   maritalStatus       MaritalStatus     @relation(fields: [marital_status_id], references: [marital_status_id])
   gender              Gender            @relation(fields: [gender_id], references: [gender_id])
   managerialPosition  ManagerialPosition @relation(fields: [managerial_position_id], references: [managerial_position_id])
   updateLogs          EmployeeUpdateLog[]
-
   @@map("Employee")
 }
 
@@ -97,6 +87,5 @@ model User {
   company   String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-
   @@map("User")
 }

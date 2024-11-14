@@ -428,9 +428,9 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
                           {employee.employment_date}
                         </td>
                         <td className={`px-4 py-1 text-center ${
-                        employee.status === 'Active' ? 'text-green-600 font-medium' : 'text-gray-600'
+                          employee.status === 'Active' ? 'text-green-600' : 'text-gray-600'
                         }`}>
-                        {employee.status}
+                          {employee.status}
                         </td>
                       </tr>
                     ))}

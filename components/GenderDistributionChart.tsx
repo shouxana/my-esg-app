@@ -53,6 +53,7 @@ interface DetailedEmployeeData {
   full_name: string;
   employment_date: string;
   termination_date: string | null;
+  status: string;
   gender_2021: string;
   gender_2022: string;
   gender_2023: string;
@@ -438,9 +439,9 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
                           {employee.employment_date}
                         </td>
                         <td className={`px-4 py-1 text-center ${
-                          !employee.termination_date ? 'text-green-600' : 'text-gray-600'
+                          employee.status === 'Active' ? 'text-green-600' : 'text-gray-600'
                         }`}>
-                          {employee.termination_date || 'Active'}
+                          {employee.status}
                         </td>
                         <td className={`px-4 py-1 text-center ${
                           employee.gender_2022 !== employee.gender_2021 ? 'bg-yellow-100' : ''

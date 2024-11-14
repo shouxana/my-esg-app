@@ -35,7 +35,7 @@ export async function GET(request: Request) {
               TO_CHAR(emp.termination_date, 'YYYY-MM-DD') as termination_date,
               CASE 
                   WHEN emp.termination_date IS NULL THEN 'Active'
-                  ELSE 'Terminated'
+                  ELSE TO_CHAR(emp.termination_date, 'YYYY-MM-DD')
               END as status,
               emp.birth_date,
               mp.managerial_position = 'Y' as is_manager,

@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+// Add these export configurations for consistency with education API
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const revalidate = 0;
+
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const company = searchParams.get('company');
@@ -39,7 +45,7 @@ export async function GET(request: Request) {
         WHERE 
             EXTRACT(YEAR FROM emp.employment_date)::integer <= y.year
             AND (emp.termination_date IS NULL OR EXTRACT(YEAR FROM emp.termination_date)::integer >= y.year)
-            AND emp.company = $2
+            AND lower(emp.company) = LOWER($2)
         ORDER BY emp.employee_id, year
       ),
       gender_updates AS (
@@ -51,7 +57,6 @@ export async function GET(request: Request) {
             updated_at
         FROM "EmployeeUpdateLog"
         WHERE changed_field = 'gender_id'
-        AND employee_id IN (SELECT employee_id FROM "Employee" WHERE company = $2)
         ORDER BY updated_at DESC
       ),
       manager_updates AS (
@@ -63,7 +68,6 @@ export async function GET(request: Request) {
             updated_at
         FROM "EmployeeUpdateLog"
         WHERE changed_field = 'managerial_position_id'
-        AND employee_id IN (SELECT employee_id FROM "Employee" WHERE company = $2)
         ORDER BY updated_at DESC
       ),
       employee_history AS (

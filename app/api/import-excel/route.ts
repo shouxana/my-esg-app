@@ -2,6 +2,20 @@ import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx-js-style';
 import pool from '@/lib/db';
 
+// Define interface for Excel row data
+interface ExcelRow {
+  full_name: string;
+  employee_mail: string;
+  birth_date?: string | number | Date;
+  employment_date?: string | number | Date;
+  termination_date?: string | number | Date | null;
+  position_id?: string | number;
+  education_id?: string | number;
+  marital_status_id?: string | number;
+  gender_id?: string | number;
+  managerial_position_id?: string | number | 'Yes' | 'No';
+}
+
 function extractCompanyFromEmail(email: string): string | null {
   try {
     const match = email.match(/@([^.]+)\./);
@@ -12,7 +26,7 @@ function extractCompanyFromEmail(email: string): string | null {
   }
 }
 
-function formatDateForPostgres(dateValue: number | string | null): string | null {
+function formatDateForPostgres(dateValue: number | string | Date | null): string | null {
   if (!dateValue) return null;
   
   try {
@@ -34,6 +48,11 @@ function formatDateForPostgres(dateValue: number | string | null): string | null
       if (!isNaN(date.getTime())) {
         return date.toISOString().split('T')[0];
       }
+    }
+    
+    // If it's a Date object
+    if (dateValue instanceof Date) {
+      return dateValue.toISOString().split('T')[0];
     }
     
     // For any other format, try to create a date object
@@ -72,7 +91,7 @@ export async function POST(request: Request) {
     });
 
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+    const jsonData = XLSX.utils.sheet_to_json<ExcelRow>(worksheet, {
       raw: true,
       dateNF: 'yyyy-mm-dd',
       defval: null

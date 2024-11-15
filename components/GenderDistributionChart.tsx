@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { exportGenderData } from './excel-export-utils';
+import { exportGenderData,exportDetailedGenderData  } from './excel-export-utils';
 import { Button } from '@/components/ui/button';
 import { Download, Table, Loader2 } from 'lucide-react';
 
@@ -87,7 +87,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
   const [error, setError] = useState<string | null>(null);
 
 
-  const fetchDetailedData = async () => {
+  const fetchDetailedData = React.useCallback(async () => {
     if (!company) return;
     
     setIsDetailedDataLoading(true);
@@ -95,20 +95,21 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
       const response = await fetch(`/api/gender-distribution/detailed?company=${encodeURIComponent(company)}`);
       if (!response.ok) throw new Error('Failed to fetch detailed data');
       const data = await response.json();
-      
-      // Filter data by company
-      const filteredData = data.filter((item: DetailedEmployeeData) => 
-        item.company === company
-      );
-      
-      setDetailedData(filteredData);
+  
+      setDetailedData(data); // Assuming the data is already filtered by company
     } catch (err) {
       console.error('Failed to fetch detailed data:', err);
       setError('Failed to load detailed data');
     } finally {
       setIsDetailedDataLoading(false);
     }
-  };
+  }, [company]);
+  
+  useEffect(() => {
+    if (viewMode === 'data') {
+      fetchDetailedData();
+    }
+  }, [viewMode, fetchDetailedData]);
 
   useEffect(() => {
     const fetchGenderDistribution = async () => {
@@ -162,32 +163,41 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
 
   const handleExport = async () => {
     try {
-      const exportData = {
-        years,
-        company,
-        data: chartData.reduce((acc, item) => ({
-          ...acc,
-          [item.year]: {
-            Male: item.Male,
-            Female: item.Female,
-            FemaleManagers: item.FemaleManagers,
-            MaleCount: item.MaleCount,
-            FemaleCount: item.FemaleCount,
-            FemaleManagerCount: item.FemaleManagerCount
-          }
-        }), {}),
-        managerData: managerChartData.reduce((acc, item) => ({
-          ...acc,
-          [item.year]: {
-            Male: item.Male,
-            Female: item.Female,
-            MaleCount: item.MaleCount,
-            FemaleCount: item.FemaleCount
-          }
-        }), {})
-      };
-
-      await exportGenderData(exportData);
+      if (viewMode === 'chart') {
+        const exportData = {
+          years,
+          company,
+          data: chartData.reduce((acc, item) => ({
+            ...acc,
+            [item.year]: {
+              Male: item.Male,
+              Female: item.Female,
+              FemaleManagers: item.FemaleManagers,
+              MaleCount: item.MaleCount,
+              FemaleCount: item.FemaleCount,
+              FemaleManagerCount: item.FemaleManagerCount
+            }
+          }), {}),
+          managerData: managerChartData.reduce((acc, item) => ({
+            ...acc,
+            [item.year]: {
+              Male: item.Male,
+              Female: item.Female,
+              MaleCount: item.MaleCount,
+              FemaleCount: item.FemaleCount
+            }
+          }), {})
+        };
+  
+        await exportGenderData(exportData);
+      } else {
+        // Ensure detailedData is loaded
+        if (!detailedData || detailedData.length === 0) {
+          await fetchDetailedData();
+        }
+        // Export detailed data
+        await exportDetailedGenderData(detailedData);
+      }
     } catch (error) {
       console.error('Export failed:', error);
       setError('Failed to export data');
@@ -261,12 +271,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
               ? 'bg-blue-500 text-white' 
               : 'border border-gray-300'
           } flex-1 flex items-center justify-center gap-2`}
-          onClick={() => {
-            setViewMode('data');
-            if (viewMode !== 'data') {
-              fetchDetailedData();
-            }
-          }}
+          onClick={() => setViewMode('data')}
         >
           <Table className="h-4 w-4" />
           Data

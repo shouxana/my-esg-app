@@ -7,10 +7,16 @@ interface DetailedEmployeeData {
   full_name: string;
   employment_date: string;
   termination_date: string | null;
+  status: string;
+  gender_2021?: string;
+  gender_2022?: string;
+  gender_2023?: string;
+  gender_2024?: string;
   education_2021?: string;
   education_2022?: string;
   education_2023?: string;
   education_2024?: string;
+  company: string;
 }
 
 interface EducationData {
@@ -51,50 +57,6 @@ const downloadExcel = (wb: WorkBook, filename: string) => {
     console.error('Error downloading Excel file:', error);
     throw new Error('Failed to download Excel file');
   }
-};
-
-export const exportDetailedEducationData = async (data: DetailedEmployeeData[]) => {
-  const wb = utils.book_new();
-
-  const wsData = [
-    ['Education Distribution - Detailed'],
-    [],
-    ['Employee', 'Employment Date', 'Status', '2021', '2022', '2023', '2024'],
-  ];
-
-  data.forEach((employee) => {
-    wsData.push([
-      `ID ${employee.employee_id}: ${employee.full_name}`,
-      employee.employment_date,
-      employee.termination_date || 'Active',
-      employee.education_2021 ?? 'N/A',
-      employee.education_2022 ?? 'N/A',
-      employee.education_2023 ?? 'N/A',
-      employee.education_2024 ?? 'N/A',
-    ]);
-  });
-
-  const ws = utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [
-    { width: 30 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-  ];
-
-  utils.book_append_sheet(wb, ws, 'Detailed Data');
-
-  try {
-    const rawData = await fetchRawData();
-    createRawDataSheet(wb, rawData);
-  } catch (error) {
-    console.warn('Could not add raw data sheet:', error);
-  }
-
-  downloadExcel(wb, 'education-distribution-detailed.xlsx');
 };
 
 const fetchRawData = async (): Promise<Employee[]> => {
@@ -158,10 +120,54 @@ const createRawDataSheet = (wb: WorkBook, rawData: Employee[]) => {
     { width: 15 },
     { width: 15 },
     { width: 10 },
-    { width: 15 },
+    { width: 18 },
   ];
 
   utils.book_append_sheet(wb, wsRaw, 'Raw Data');
+};
+
+export const exportDetailedEducationData = async (data: DetailedEmployeeData[]) => {
+  const wb = utils.book_new();
+
+  const wsData = [
+    ['Education Distribution - Detailed'],
+    [],
+    ['Employee', 'Employment Date', 'Status', '2021', '2022', '2023', '2024'],
+  ];
+
+  data.forEach((employee) => {
+    wsData.push([
+      `ID ${employee.employee_id}: ${employee.full_name}`,
+      employee.employment_date,
+      employee.termination_date || 'Active',
+      employee.education_2021 ?? 'N/A',
+      employee.education_2022 ?? 'N/A',
+      employee.education_2023 ?? 'N/A',
+      employee.education_2024 ?? 'N/A',
+    ]);
+  });
+
+  const ws = utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [
+    { width: 30 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+  ];
+
+  utils.book_append_sheet(wb, ws, 'Detailed Data');
+
+  try {
+    const rawData = await fetchRawData();
+    createRawDataSheet(wb, rawData);
+  } catch (error) {
+    console.warn('Could not add raw data sheet:', error);
+  }
+
+  downloadExcel(wb, 'education-distribution-detailed.xlsx');
 };
 
 export const exportEducationData = async (
@@ -178,7 +184,7 @@ export const exportEducationData = async (
   data.labels.forEach((education) => {
     const row = [education];
     data.years.forEach((year) => {
-      row.push(`${data.data[year]?.[education]?.toFixed(1)}%`);
+      row.push(`${data.data[year]?.[education]?.toFixed(1)}%` || '0%');
     });
     wsDistData.push(row);
   });
@@ -225,7 +231,15 @@ export const exportGenderData = async (
   const wsDistData = [
     ['Gender Distribution Data'],
     [],
-    ['Year', 'Male %', 'Male Count', 'Female %', 'Female Count', 'Women in Management %', 'Women Managers Count'],
+    [
+      'Year',
+      'Male %',
+      'Male Count',
+      'Female %',
+      'Female Count',
+      'Women in Management %',
+      'Women Managers Count',
+    ],
   ];
 
   data.years.forEach((year) => {
@@ -265,3 +279,54 @@ export const exportGenderData = async (
   downloadExcel(wb, 'gender_data.xlsx');
 };
 
+export const exportDetailedGenderData = async (data: DetailedEmployeeData[]) => {
+  const wb = utils.book_new();
+
+  const wsData = [
+    ['Detailed Gender Data'],
+    [],
+    [
+      'Employee ID',
+      'Full Name',
+      'Employment Date',
+      'Termination Date',
+      'Status',
+      'Gender 2021',
+      'Gender 2022',
+      'Gender 2023',
+      'Gender 2024'
+    ],
+  ];
+
+  data.forEach((employee) => {
+    wsData.push([
+      employee.employee_id.toString(),
+      employee.full_name,
+      employee.employment_date,
+      employee.termination_date || 'Active',
+      employee.status,
+      employee.gender_2021 ?? 'N/A',
+      employee.gender_2022 ?? 'N/A',
+      employee.gender_2023 ?? 'N/A',
+      employee.gender_2024 ?? 'N/A'
+    ]);
+  });
+
+  const ws = utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [
+    { width: 15 },
+    { width: 25 },
+    { width: 15 },
+    { width: 15 },
+    { width: 10 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+    { width: 15 },
+  ];
+
+  utils.book_append_sheet(wb, ws, 'Detailed Gender Data');
+
+  downloadExcel(wb, 'detailed_gender_data.xlsx');
+};

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
               ELSE NULL  -- This will exclude employees who left before the selected year
             END as status,
             EXTRACT(YEAR FROM AGE(make_date($1::int, 12, 31), e.birth_date))::integer as age_in_year,
-            e.managerial_position_id IS NOT NULL as is_manager
+            e.managerial_position_id = '1' as is_manager
           FROM "Employee" e
           WHERE 
             lower(e.company) = lower($2)

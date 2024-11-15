@@ -6,6 +6,8 @@ import DataInputForm from './DataInputForm';
 import EducationChart from './EducationChart';
 import GenderDistributionChart from './GenderDistributionChart';
 import EmployeeFluctuationChart from './EmployeeFluctuationChart';
+import LeaveTrackingChart from './EmployeeLeaveChart';
+
 
 interface TabType {
   label: string;
@@ -139,6 +141,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
             <EducationChart company={company} />
             <GenderDistributionChart years={years} company={company} />
             <EmployeeFluctuationChart company={company} />
+            <LeaveTrackingChart company={company} />
           </div>
         )}
         {activeTab === 'visuals' && isLoading && (

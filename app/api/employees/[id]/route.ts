@@ -20,16 +20,16 @@ export async function PUT(request: NextRequest, props: Props) {
     const body = await request.json();
 
     const formatDateForComparison = (date: string | Date | null) => {
-      if (!date) return null;
-      // Simply get YYYY-MM-DD part
-      return date.toString().split('T')[0].split(' ')[0];
-    };
+  if (!date || date === '') return null;
+  // Simply get YYYY-MM-DD part
+  return date.toString().split('T')[0].split(' ')[0];
+};
 
     const formatDateForDB = (dateString: string) => {
-      if (!dateString) return null;
-      // Ensure consistent date format for DB
-      return dateString.split('T')[0].split(' ')[0];
-    };
+  if (!dateString || dateString === '') return null;
+  // Ensure consistent date format for DB
+  return dateString.split('T')[0].split(' ')[0];
+};
 
     const client = await pool.connect();
     try {

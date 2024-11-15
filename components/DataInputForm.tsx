@@ -413,13 +413,13 @@
 
     try {
       const formattedData = {
-        ...formData,
+        ...updateFormData,
         company,
-        birth_date: formData.birth_date || null,
-        employment_date: formData.employment_date || null,
-        termination_date: formData.termination_date || null,
-        leave_date_start: formData.leave_date_start || null,
-        leave_date_end: formData.leave_date_end || null,
+        birth_date: updateFormData.birth_date ,
+        employment_date: updateFormData.employment_date || null,
+        termination_date: updateFormData.termination_date || null,
+        leave_date_start: updateFormData.leave_date_start || null,
+        leave_date_end: updateFormData.leave_date_end || null,
       };
 
       const response = await fetch('/api/employees', {
@@ -514,19 +514,24 @@
       setIsModalOpen(true);
       return;
     }
-
+  
     setIsLoading(true);
     try {
+      // Check required fields
+      if (!updateFormData.birth_date) {
+        throw new Error('Birth date is required');
+      }
+  
       const formattedData = {
-        ...formData,
+        ...updateFormData,
         company,
-        birth_date: formData.birth_date || null,
-        employment_date: formData.employment_date || null,
-        termination_date: formData.termination_date || null,
-        leave_date_start: formData.leave_date_start || null,
-        leave_date_end: formData.leave_date_end || null,
+        birth_date: updateFormData.birth_date,
+        employment_date: updateFormData.employment_date || null,
+        termination_date: updateFormData.termination_date || null,
+        leave_date_start: updateFormData.leave_date_start || null,
+        leave_date_end: updateFormData.leave_date_end || null,
       };
-
+  
       const response = await fetch(`/api/employees/${selectedEmployee}`, {
         method: 'PUT',
         headers: {
@@ -536,12 +541,12 @@
         cache: 'no-store',
         body: JSON.stringify(formattedData)
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Failed to update employee');
       }
-
+  
       await refreshEmployees();
       setModalData({
         type: 'SUCCESS',

@@ -80,6 +80,8 @@ export async function POST(request: Request) {
           birth_date,
           employment_date,
           termination_date,
+          leave_date_start,
+          leave_date_end,
           position_id,
           education_id,
           marital_status_id,
@@ -88,14 +90,16 @@ export async function POST(request: Request) {
           company,
           created_at,
           updated_at
-        ) VALUES ($1, $2, $3::DATE, $4::DATE, $5::DATE, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ) VALUES ($1, $2, $3::DATE, $4::DATE, $5::DATE, $6::DATE, $7::DATE, $8, $9, $10, $11, $12, $13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *`,
         [
           body.full_name,
           body.employee_mail,
           body.birth_date,
           body.employment_date,
-          body.termination_date,
+          body.termination_date || null,
+          body.leave_date_start || null,
+          body.leave_date_end || null,
           body.position_id,
           body.education_id,
           body.marital_status_id,

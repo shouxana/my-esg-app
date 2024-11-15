@@ -413,13 +413,13 @@
 
     try {
       const formattedData = {
-        ...updateFormData,
+        ...formData,
         company,
-        birth_date: updateFormData.birth_date || null,
-        employment_date: updateFormData.employment_date || null,
-        termination_date: updateFormData.termination_date || null,
-        leave_date_start: updateFormData.leave_date_start || null,
-        leave_date_end: updateFormData.leave_date_end || null,
+        birth_date: formData.birth_date || null,
+        employment_date: formData.employment_date || null,
+        termination_date: formData.termination_date || null,
+        leave_date_start: formData.leave_date_start || null,
+        leave_date_end: formData.leave_date_end || null,
       };
 
       const response = await fetch('/api/employees', {
@@ -518,13 +518,13 @@
     setIsLoading(true);
     try {
       const formattedData = {
-        ...updateFormData,
+        ...formData,
         company,
-        birth_date: updateFormData.birth_date || null,
-        employment_date: updateFormData.employment_date || null,
-        termination_date: updateFormData.termination_date || null,
-        leave_date_start: updateFormData.leave_date_start || null,
-        leave_date_end: updateFormData.leave_date_end || null,
+        birth_date: formData.birth_date || null,
+        employment_date: formData.employment_date || null,
+        termination_date: formData.termination_date || null,
+        leave_date_start: formData.leave_date_start || null,
+        leave_date_end: formData.leave_date_end || null,
       };
 
       const response = await fetch(`/api/employees/${selectedEmployee}`, {
@@ -682,7 +682,9 @@
                         name={field.label.toLowerCase().replace(/\s+/g, '_')}
                         value={formData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof formData] || ''}
                         onChange={handleInputChange}
-                        required={field.label !== 'Termination Date'}
+                        required={field.label !== 'Termination Date' && 
+                          field.label !== 'Leave Date Start' && 
+                          field.label !== 'Leave Start End'}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>

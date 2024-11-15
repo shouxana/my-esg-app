@@ -335,9 +335,59 @@ const handleSubmit = async (e: React.FormEvent) => {
       body: JSON.stringify(formattedData)
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create employee');
+    const result = await response.json();
+
+    if (response.status === 409) {
+      // Handle duplicate cases
+      if (result.type === 'EMAIL_EXISTS') {
+        const shouldProceed = await new Promise((resolve) => {
+          const emailSuggestions = result.suggestions.join('\n');
+          const message = `This email is already registered for employee: ${result.existingEmployee.full_name}.\n\n` +
+                         `You might want to try these email suggestions:\n${emailSuggestions}`;
+          
+          alert(message);
+          resolve(false);
+        });
+
+        if (!shouldProceed) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (result.type === 'DUPLICATE_PERSON') {
+        const shouldProceed = await new Promise((resolve) => {
+          const message = `An employee with the same name and birth date already exists ` +
+                         `(Email: ${result.existingEmployee.employee_mail}).\n\n` +
+                         `Do you want to proceed with adding this employee anyway?`;
+          
+          if (window.confirm(message)) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        });
+
+        if (!shouldProceed) {
+          setIsLoading(false);
+          return;
+        }
+
+        // If user wants to proceed, make the request again with force flag
+        const forceResponse = await fetch('/api/employees', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...formattedData, force: true })
+        });
+
+        if (!forceResponse.ok) {
+          throw new Error('Failed to create employee');
+        }
+      }
+    } else if (!response.ok) {
+      throw new Error('Failed to create employee');
     }
 
     await refreshEmployees();

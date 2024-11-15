@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       'marital_status_id',
       'gender_id',
       'managerial_position_id',
-      'company' // Added company as required field
+      'company'
     ];
 
     const missingFields = requiredFields.filter(field => !body[field]);
@@ -30,6 +30,49 @@ export async function POST(request: Request) {
     const client = await pool.connect();
     
     try {
+      // Check for existing email
+      const emailCheck = await client.query(
+        `SELECT employee_id, full_name FROM "Employee" 
+         WHERE lower(employee_mail) = lower($1) AND lower(company) = lower($2)`,
+        [body.employee_mail, body.company]
+      );
+
+      if (emailCheck.rows.length > 0) {
+        // Generate email suggestions
+        const nameParts = body.full_name.toLowerCase().split(' ');
+        const suggestions = [
+          `${nameParts[0]}.${nameParts[nameParts.length-1]}@${body.employee_mail.split('@')[1]}`,
+          `${nameParts[0]}${nameParts[nameParts.length-1]}@${body.employee_mail.split('@')[1]}`,
+          `${nameParts[0]}${nameParts[nameParts.length-1]}1@${body.employee_mail.split('@')[1]}`,
+          `${nameParts[0]}.${nameParts[nameParts.length-1]}1@${body.employee_mail.split('@')[1]}`
+        ];
+
+        return NextResponse.json({
+          type: 'EMAIL_EXISTS',
+          message: 'Email already exists',
+          existingEmployee: emailCheck.rows[0],
+          suggestions
+        }, { status: 409 });
+      }
+
+      // Check for existing name and birth date
+      const nameAndDobCheck = await client.query(
+        `SELECT employee_id, employee_mail FROM "Employee" 
+         WHERE lower(full_name) = lower($1) 
+         AND birth_date = $2::DATE 
+         AND lower(company) = lower($3)`,
+        [body.full_name, body.birth_date, body.company]
+      );
+
+      if (nameAndDobCheck.rows.length > 0) {
+        return NextResponse.json({
+          type: 'DUPLICATE_PERSON',
+          message: 'Employee with same name and birth date exists',
+          existingEmployee: nameAndDobCheck.rows[0]
+        }, { status: 409 });
+      }
+
+      // If no duplicates found, proceed with insertion
       const { rows } = await client.query(
         `INSERT INTO "Employee" (
           full_name,
@@ -50,9 +93,9 @@ export async function POST(request: Request) {
         [
           body.full_name,
           body.employee_mail,
-          (body.birth_date),
-          (body.employment_date),
-          (body.termination_date),
+          body.birth_date,
+          body.employment_date,
+          body.termination_date,
           body.position_id,
           body.education_id,
           body.marital_status_id,
@@ -62,7 +105,10 @@ export async function POST(request: Request) {
         ]
       );
 
-      return NextResponse.json(rows[0]);
+      return NextResponse.json({
+        type: 'SUCCESS',
+        data: rows[0]
+      });
     } catch (error) {
       console.error('SQL Error:', error);
       return NextResponse.json(

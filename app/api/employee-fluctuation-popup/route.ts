@@ -31,8 +31,9 @@ export async function GET(request: Request) {
             e.birth_date,
             e.employment_date::text,
             CASE 
-              WHEN e.termination_date IS NULL THEN 'Active'
-              ELSE e.termination_date::text
+              WHEN e.termination_date IS NULL OR EXTRACT(YEAR FROM e.termination_date) > $1::int THEN 'Active'
+              WHEN EXTRACT(YEAR FROM e.termination_date) = $1::int THEN e.termination_date::text
+              ELSE NULL  -- This will exclude employees who left before the selected year
             END as status,
             EXTRACT(YEAR FROM AGE(make_date($1::int, 12, 31), e.birth_date))::integer as age_in_year,
             e.managerial_position_id IS NOT NULL as is_manager
@@ -62,6 +63,7 @@ export async function GET(request: Request) {
                 END
             END as age_category
           FROM employee_ages
+          WHERE status IS NOT NULL  -- Only include employees who were active during the selected year
         )
         SELECT 
           employee_id,
@@ -77,8 +79,7 @@ export async function GET(request: Request) {
       `;
 
       const { rows } = await client.query(query, [year, company, category]);
-
-      // Transform the rows to match the DetailedEmployee interface
+      
       const transformedRows = rows.map(row => ({
         employee_id: row.employee_id,
         full_name: row.full_name,

@@ -413,13 +413,13 @@
 
     try {
       const formattedData = {
-        ...updateFormData,
+        ...formData,
         company,
-        birth_date: updateFormData.birth_date ,
-        employment_date: updateFormData.employment_date || null,
-        termination_date: updateFormData.termination_date || null,
-        leave_date_start: updateFormData.leave_date_start || null,
-        leave_date_end: updateFormData.leave_date_end || null,
+        birth_date: formData.birth_date ,
+        employment_date: formData.employment_date || null,
+        termination_date: formData.termination_date || null,
+        leave_date_start: formData.leave_date_start || null,
+        leave_date_end: formData.leave_date_end || null,
       };
 
       const response = await fetch('/api/employees', {

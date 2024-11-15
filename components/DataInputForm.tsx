@@ -6,6 +6,8 @@ import { Upload } from 'lucide-react';
 import ColumnMappingModal from '../components/ColumnMappingModal';
 import EmployeeUpdateLogModal from './EmployeeUpdateLogModal';
 import { ColumnMapping } from '@/types/column-mapping';
+import ConfirmationModal from './ConfirmationModal';
+
 
 
 
@@ -17,6 +19,19 @@ type InputField = {
   label: string;
   type: 'text' | 'date' | 'select';
   options?: { value: string; label: string; }[];
+}
+
+type ModalType = 'EMAIL_EXISTS' | 'DUPLICATE_PERSON' | 'SUCCESS' | 'ERROR';
+
+interface ModalData {
+  type: ModalType;
+  title: string;
+  existingEmployee?: {
+    full_name: string;
+    employee_mail?: string;
+  };
+  suggestions?: string[];
+  message?: string;
 }
 
 type DropdownOption = {
@@ -118,6 +133,70 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ company }) => {
   const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const updateSectionRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<ModalData | null>(null);
+  const [isProcessingModal, setIsProcessingModal] = useState(false);
+
+  const handleEmailSuggestionSelect = (suggestion: string) => {
+    setFormData(prev => ({
+      ...prev,
+      employee_mail: suggestion
+    }));
+    setIsModalOpen(false);
+  };
+  
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setModalData(null);
+    setIsProcessingModal(false);
+  };
+  
+  const handleDuplicateConfirm = async () => {
+    setIsProcessingModal(true);
+    try {
+      const forceResponse = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...formData, force: true })
+      });
+  
+      if (!forceResponse.ok) {
+        throw new Error('Failed to create employee');
+      }
+  
+      await refreshEmployees();
+      setModalData({
+        type: 'SUCCESS',
+        title: 'Success',
+        message: 'Employee added successfully!'
+      });
+  
+      // Reset form
+      setFormData({
+        full_name: '',
+        employee_mail: '',
+        birth_date: '',
+        employment_date: '',
+        termination_date: '',
+        position_id: '',
+        education_id: '',
+        marital_status_id: '',
+        gender_id: '',
+        managerial_position_id: '',
+        company
+      });
+    } catch (error) {
+      setModalData({
+        type: 'ERROR',
+        title: 'Error',
+        message: `Failed to add employee: ${(error as Error).message}`
+      });
+    } finally {
+      setIsProcessingModal(false);
+    }
+  };
 
   // Form data states
   const [formData, setFormData] = useState({
@@ -338,60 +417,47 @@ const handleSubmit = async (e: React.FormEvent) => {
     const result = await response.json();
 
     if (response.status === 409) {
-      // Handle duplicate cases
       if (result.type === 'EMAIL_EXISTS') {
-        const shouldProceed = await new Promise((resolve) => {
-          const emailSuggestions = result.suggestions.join('\n');
-          const message = `This email is already registered for employee: ${result.existingEmployee.full_name}.\n\n` +
-                         `You might want to try these email suggestions:\n${emailSuggestions}`;
-          
-          alert(message);
-          resolve(false);
+        setModalData({
+          type: 'EMAIL_EXISTS',
+          title: 'Email Already Registered',
+          existingEmployee: {
+            full_name: result.existingEmployee.full_name,
+            employee_mail: result.existingEmployee.employee_mail
+          },
+          suggestions: result.suggestions
         });
-
-        if (!shouldProceed) {
-          setIsLoading(false);
-          return;
-        }
+        setIsModalOpen(true);
+        return;
       }
 
       if (result.type === 'DUPLICATE_PERSON') {
-        const shouldProceed = await new Promise((resolve) => {
-          const message = `An employee with the same name and birth date already exists ` +
-                         `(Email: ${result.existingEmployee.employee_mail}).\n\n` +
-                         `Do you want to proceed with adding this employee anyway?`;
-          
-          if (window.confirm(message)) {
-            resolve(true);
-          } else {
-            resolve(false);
+        setModalData({
+          type: 'DUPLICATE_PERSON',
+          title: 'Duplicate Employee Found',
+          existingEmployee: {
+            full_name: result.existingEmployee.full_name,
+            employee_mail: result.existingEmployee.employee_mail
           }
         });
-
-        if (!shouldProceed) {
-          setIsLoading(false);
-          return;
-        }
-
-        // If user wants to proceed, make the request again with force flag
-        const forceResponse = await fetch('/api/employees', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...formattedData, force: true })
-        });
-
-        if (!forceResponse.ok) {
-          throw new Error('Failed to create employee');
-        }
+        setIsModalOpen(true);
+        return;
       }
-    } else if (!response.ok) {
+    }
+
+    if (!response.ok) {
       throw new Error('Failed to create employee');
     }
 
+    // Success case
+    setModalData({
+      type: 'SUCCESS',
+      title: 'Success',
+      message: 'Employee added successfully!'
+    });
+    setIsModalOpen(true);
+
     await refreshEmployees();
-    alert('Employee added successfully!');
     
     // Reset form
     setFormData({
@@ -408,8 +474,12 @@ const handleSubmit = async (e: React.FormEvent) => {
       company
     });
   } catch (error) {
-    console.error('Error creating employee:', error);
-    alert('Failed to add employee: ' + (error as Error).message);
+    setModalData({
+      type: 'ERROR',
+      title: 'Error',
+      message: `Failed to add employee: ${(error as Error).message}`
+    });
+    setIsModalOpen(true);
   } finally {
     setIsLoading(false);
   }
@@ -418,7 +488,12 @@ const handleSubmit = async (e: React.FormEvent) => {
 const handleUpdateSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!selectedEmployee) {
-    alert('Please select an employee');
+    setModalData({
+      type: 'ERROR',
+      title: 'Error',
+      message: 'Please select an employee'
+    });
+    setIsModalOpen(true);
     return;
   }
 
@@ -432,8 +507,6 @@ const handleUpdateSubmit = async (e: React.FormEvent) => {
       termination_date: updateFormData.termination_date || null,
     };
 
-    console.log('Sending update data:', formattedData); // Debug log
-
     const response = await fetch(`/api/employees/${selectedEmployee}`, {
       method: 'PUT',
       headers: {
@@ -444,23 +517,26 @@ const handleUpdateSubmit = async (e: React.FormEvent) => {
       body: JSON.stringify(formattedData)
     });
 
-    // Debug logs
-    console.log('Response status:', response.status);
-    const responseText = await response.text();
-    console.log('Response text:', responseText);
-
     if (!response.ok) {
-      throw new Error(responseText || 'Failed to update employee');
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update employee');
     }
 
-    // Only parse as JSON if we have content
-    const result = responseText ? JSON.parse(responseText) : {};
-
     await refreshEmployees();
-    alert('Employee updated successfully!');
+    setModalData({
+      type: 'SUCCESS',
+      title: 'Success',
+      message: 'Employee updated successfully!'
+    });
+    setIsModalOpen(true);
   } catch (error) {
     console.error('Error updating employee:', error);
-    alert('Failed to update employee: ' + (error as Error).message);
+    setModalData({
+      type: 'ERROR',
+      title: 'Error',
+      message: `Failed to update employee: ${(error as Error).message}`
+    });
+    setIsModalOpen(true);
   } finally {
     setIsLoading(false);
   }
@@ -839,6 +915,18 @@ const handleMappedDataImport = async (mappings: ColumnMapping[], data: any[]) =>
           onClose={() => setIsChangeLogOpen(false)}
           employeeId={selectedEmployee}
           employeeName={updateFormData.full_name}
+          company={company}
+        />
+      )}
+
+      {/* Add this before the final closing div in your return statement */}
+      {modalData && (
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onConfirm={modalData.type === 'DUPLICATE_PERSON' ? handleDuplicateConfirm : undefined}
+          onSelectSuggestion={handleEmailSuggestionSelect}
+          data={modalData}
           company={company}
         />
       )}

@@ -250,28 +250,39 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
     <div className="w-full">
       {/* Header Section - Updated to match Gender Distribution layout */}
       <div className="flex flex-col gap-4 mb-6">
-        <div className="flex justify-between items-center">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Education Distributions
-            </h2>
-            <p className="text-sm text-gray-600">
-              Company: {company.toUpperCase()}
-            </p>
-          </div>
-          <button
-            className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-              isLoading || isDetailedDataLoading
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'border border-gray-300 hover:bg-gray-50'
-            }`}
-            onClick={handleExport}
-            disabled={isLoading || isDetailedDataLoading}
-          >
-            <Download className="h-4 w-4" />
-            Export Excel
-          </button>
+      <div className="flex justify-between items-center">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            Employee Fluctuation
+            <svg 
+              viewBox="0 0 100 100" 
+              className="h-[1em] w-[1em]" 
+              role="img"
+              aria-label="SDG Goal 4 - Quality Education"
+            >
+              <rect width="100" height="100" fill="#C5192D"/>
+              <path 
+                d="M50 20L25 35v30l25 15 25-15V35L50 20zm0 8l17 10v14L50 62 33 52V38l17-10z" 
+                fill="white"
+              />
+              <path 
+                d="M50 44c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm0-12c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" 
+                fill="white"
+              />
+            </svg>
+          </h2>
+          <p className="text-sm text-gray-600">
+            Company: {company.toUpperCase()}
+          </p>
         </div>
+        <button
+          className="px-4 py-2 rounded-md flex items-center gap-2 border border-gray-300 hover:bg-gray-50"
+          onClick={handleExport}
+        >
+          <Download className="h-4 w-4" />
+          Export Excel
+        </button>
+      </div>
 
         <div className="flex gap-2">
           <button

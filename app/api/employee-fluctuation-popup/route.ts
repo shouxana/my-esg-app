@@ -2,6 +2,20 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
+interface QueryRow {
+  employee_id: string;
+  full_name: string;
+  employment_date: string;
+  status: string;
+  age_in_year: string;
+  is_manager: boolean;
+  age_category: string;
+}
+
+interface TransformedRow extends QueryRow {
+  age_at_year: number;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -24,10 +38,9 @@ export async function GET(request: Request) {
 
     const client = await pool.connect();
     try {
-      let query;
+      let query: string;
       
       if (category === 'Left Company' || category === 'Joined Company') {
-        // Special query for Left/Joined Company categories
         query = `
           SELECT 
             e.employee_id::text,
@@ -52,7 +65,6 @@ export async function GET(request: Request) {
           ORDER BY e.full_name;
         `;
       } else {
-        // Existing query for age categories
         query = `
           WITH employee_ages AS (
             SELECT 
@@ -110,9 +122,9 @@ export async function GET(request: Request) {
         `;
       }
 
-      const { rows } = await client.query(query, [year, company, category]);
+      const { rows } = await client.query<QueryRow>(query, [year, company, category]);
       
-      const transformedRows = rows.map(row => ({
+      const transformedRows: TransformedRow[] = rows.map(row => ({
         employee_id: row.employee_id,
         full_name: row.full_name,
         employment_date: row.employment_date,

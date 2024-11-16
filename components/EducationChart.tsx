@@ -251,12 +251,13 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
       {/* Header Section - Updated to match Gender Distribution layout */}
       <div className="flex flex-col gap-4 mb-6">
       <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            Employee Fluctuation
+      <div className="space-y-1">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          Employee Education
+          <div className="relative group">
             <svg 
               viewBox="0 0 100 100" 
-              className="h-[1em] w-[1em]" 
+              className="h-[1em] w-[1em] cursor-help" 
               role="img"
               aria-label="SDG Goal 4 - Quality Education"
             >
@@ -270,11 +271,15 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
                 fill="white"
               />
             </svg>
-          </h2>
-          <p className="text-sm text-gray-600">
-            Company: {company.toUpperCase()}
-          </p>
-        </div>
+            <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full top-0 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
+              SDG Goal 4 - Quality Education
+            </div>
+          </div>
+        </h2>
+        <p className="text-sm text-gray-600">
+          Company: {company.toUpperCase()}
+        </p>
+      </div>
         <button
           className="px-4 py-2 rounded-md flex items-center gap-2 border border-gray-300 hover:bg-gray-50"
           onClick={handleExport}

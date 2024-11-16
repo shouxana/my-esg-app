@@ -231,28 +231,48 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
   return (
     <div className="w-full">
       <div className="flex flex-col gap-4 mb-6">
-        <div className="flex justify-between items-center">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Gender Distribution
-            </h2>
-            <p className="text-sm text-gray-600">
-              Company: {company.toUpperCase()}
-            </p>
-          </div>
-          <button
-            className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-              isLoading || isDetailedDataLoading
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'border border-gray-300 hover:bg-gray-50'
-            }`}
-            onClick={handleExport}
-            disabled={isLoading || isDetailedDataLoading}
-          >
-            <Download className="h-4 w-4" />
-            Export Excel
-          </button>
-        </div>
+      <div className="flex justify-between items-center">
+  <div className="space-y-1">
+    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+      Gender Distribution
+      <svg 
+        viewBox="0 0 100 100" 
+        className="h-[1em] w-[1em]" 
+        role="img"
+        aria-label="SDG Goal 5 - Gender Equality"
+      >
+        <rect width="100" height="100" fill="#FF3A21"/>
+        <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
+        <rect x="46" y="59" width="8" height="14" fill="white"/>
+        <rect x="38" y="67" width="24" height="8" fill="white"/>
+      </svg>
+      <svg 
+        viewBox="0 0 100 100" 
+        className="h-[1em] w-[1em]"
+        role="img"
+        aria-label="SDG Goal 10 - Reduced Inequalities"
+      >
+        <rect width="100" height="100" fill="#DD1367"/>
+        <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
+      </svg>
+    </h2>
+    <p className="text-sm text-gray-600">
+      Company: {company.toUpperCase()}
+    </p>
+  </div>
+  <button
+    className={`px-4 py-2 rounded-md flex items-center gap-2 ${
+      isLoading || isDetailedDataLoading
+        ? 'bg-gray-300 cursor-not-allowed'
+        : 'border border-gray-300 hover:bg-gray-50'
+    }`}
+    onClick={handleExport}
+    disabled={isLoading || isDetailedDataLoading}
+  >
+    <Download className="h-4 w-4" />
+    Export Excel
+  </button>
+</div>
 
         <div className="flex gap-2">
         <button

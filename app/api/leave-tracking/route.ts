@@ -50,26 +50,26 @@ export async function GET(request: Request) {
               y.year,
               CASE 
                 WHEN e.leave_date_start IS NOT NULL 
-                AND EXTRACT(YEAR FROM e.leave_date_start) = y.year
+                AND EXTRACT(YEAR FROM e.leave_date_start::timestamp) = y.year
                 THEN 
                   CASE 
                     WHEN e.leave_date_end IS NULL THEN
-                      EXTRACT(DAY FROM (CURRENT_DATE - e.leave_date_start))
+                      EXTRACT(DAY FROM (CURRENT_DATE - e.leave_date_start::timestamp))::integer
                     ELSE
-                      EXTRACT(DAY FROM (e.leave_date_end - e.leave_date_start))
+                      EXTRACT(DAY FROM (e.leave_date_end::timestamp - e.leave_date_start::timestamp))::integer
                   END
                 ELSE NULL
               END as leave_duration,
               CASE 
                 WHEN e.leave_date_start IS NOT NULL 
-                AND EXTRACT(YEAR FROM e.leave_date_start) = y.year
+                AND EXTRACT(YEAR FROM e.leave_date_start::timestamp) = y.year
                 THEN 1
                 ELSE 0
               END as has_leave,
               CASE 
                 WHEN e.leave_date_start IS NOT NULL 
                 AND e.leave_date_end IS NULL
-                AND EXTRACT(YEAR FROM e.leave_date_start) = y.year
+                AND EXTRACT(YEAR FROM e.leave_date_start::timestamp) = y.year
                 THEN 1
                 ELSE 0
               END as is_ongoing
@@ -77,8 +77,8 @@ export async function GET(request: Request) {
           JOIN "Gender" g ON e.gender_id = g.gender_id
           CROSS JOIN last_four_years y
           WHERE 
-              EXTRACT(YEAR FROM e.employment_date) <= y.year
-              AND (e.termination_date IS NULL OR EXTRACT(YEAR FROM e.termination_date) >= y.year)
+              EXTRACT(YEAR FROM e.employment_date::timestamp) <= y.year
+              AND (e.termination_date IS NULL OR EXTRACT(YEAR FROM e.termination_date::timestamp) >= y.year)
               AND LOWER(e.company) = LOWER($2)
       ),
       leave_stats AS (

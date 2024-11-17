@@ -1280,7 +1280,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-6 flex justify-end space-x-4">
                 <button
                   type="submit"
                   disabled={isLoading}

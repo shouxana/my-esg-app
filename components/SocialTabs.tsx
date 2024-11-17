@@ -105,9 +105,9 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
 
   return (
     <div className="w-full">
-      {/* Fixed Tab Navigation with correct border */}
+      {/* Fixed Tab Navigation with improved styling */}
       <div className="sticky top-0 z-50">
-        <div className="border-2 border-gray-300 bg-white shadow-md">
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
           <nav className="flex space-x-8 px-4" aria-label="Tabs">
             {Object.entries(tabs).map(([key, tab]) => {
               const Icon = tab.icon;
@@ -116,10 +116,10 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
                   key={key}
                   onClick={() => setActiveTab(key as typeof activeTab)}
                   className={`
-                    group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
-                    ${activeTab === key 
-                      ? tab.color
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                    group inline-flex items-center py-3 px-4 rounded-md font-medium text-sm transition-colors
+                    ${activeTab === key
+                      ? `${tab.color} bg-white shadow-md`
+                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-100'}
                   `}
                 >
                   <Icon className="mr-2 h-5 w-5" />
@@ -132,31 +132,31 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
       </div>
 
       {/* Tab Content */}
-      <div className="mt-4">
-        {activeTab === 'input' && company && (
-          <DataInputForm company={company} />
-        )}
-        {activeTab === 'visuals' && !isLoading && years.length > 0 && company && (
-          <div className="space-y-6">
-            <EducationChart company={company} />
-            <GenderDistributionChart years={years} company={company} />
-            <EmployeeFluctuationChart company={company} />
-            <LeaveTrackingChart company={company} />
-          </div>
-        )}  
-        {activeTab === 'visuals' && isLoading && (
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            Loading data...
-          </div>
-        )}
-        {activeTab === 'visuals' && !isLoading && years.length === 0 && (
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            No data available for {company.toUpperCase()}
-          </div>
-        )}
-      </div>
+    <div className="mt-4">
+      {activeTab === 'input' && company && (
+        <DataInputForm company={company} />
+      )}
+      {activeTab === 'visuals' && !isLoading && years.length > 0 && company && (
+        <div className="space-y-6">
+          <EducationChart company={company} />
+          <GenderDistributionChart years={years} company={company} />
+          <EmployeeFluctuationChart company={company} />
+          <LeaveTrackingChart company={company} />
+        </div>
+      )}
+      {activeTab === 'visuals' && isLoading && (
+        <div className="h-64 flex items-center justify-center text-gray-500">
+          Loading data...
+        </div>
+      )}
+      {activeTab === 'visuals' && !isLoading && years.length === 0 && (
+        <div className="h-64 flex items-center justify-center text-gray-500">
+          No data available for {company.toUpperCase()}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default SocialTabs;

@@ -229,275 +229,321 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
   }
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col gap-4 mb-6">
-      <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            Gender Distribution
-            <div className="relative group">
-              <svg 
-                viewBox="0 0 100 100" 
-                className="h-[1em] w-[1em] cursor-help" 
-                role="img"
-                aria-label="SDG Goal 5 - Gender Equality"
-              >
-                <rect width="100" height="100" fill="#FF3A21"/>
-                <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
-                <rect x="46" y="59" width="8" height="14" fill="white"/>
-                <rect x="38" y="67" width="24" height="8" fill="white"/>
-              </svg>
-              <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
-                SDG Goal 5 - Gender Equality
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-2xl font-bold text-gray-800">Gender Distribution</h2>
+              <div className="relative group">
+                <div className="bg-red-600 rounded p-1">
+                  <svg 
+                    viewBox="0 0 100 100" 
+                    className="h-[1em] w-[1em] cursor-help" 
+                    role="img"
+                    aria-label="SDG Goal 5 - Gender Equality"
+                  >
+                    <rect width="100" height="100" fill="#FF3A21"/>
+                    <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
+                    <rect x="46" y="59" width="8" height="14" fill="white"/>
+                    <rect x="38" y="67" width="24" height="8" fill="white"/>
+                  </svg>
+                </div>
+                <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
+                  SDG Goal 5 - Gender Equality
+                </div>
+              </div>
+              <div className="relative group">
+                <div className="bg-pink-600 rounded p-1">
+                  <svg 
+                    viewBox="0 0 100 100" 
+                    className="h-[1em] w-[1em] cursor-help"
+                    role="img"
+                    aria-label="SDG Goal 10 - Reduced Inequalities"
+                  >
+                    <rect width="100" height="100" fill="#DD1367"/>
+                    <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
+                  </svg>
+                </div>
+                <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
+                  SDG Goal 10 - Reduced Inequalities
+                </div>
               </div>
             </div>
-            <div className="relative group">
-              <svg 
-                viewBox="0 0 100 100" 
-                className="h-[1em] w-[1em] cursor-help"
-                role="img"
-                aria-label="SDG Goal 10 - Reduced Inequalities"
-              >
-                <rect width="100" height="100" fill="#DD1367"/>
-                <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
-              </svg>
-              <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
-                SDG Goal 10 - Reduced Inequalities
-              </div>
-            </div>
-          </h2>
-          <p className="text-sm text-gray-600">
-            Company: {company.toUpperCase()}
-          </p>
+          </div>
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+          >
+            <Download className="h-4 w-4" />
+            Export Excel
+          </button>
         </div>
-        <button
-          className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-            isLoading || isDetailedDataLoading
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'border border-gray-300 hover:bg-gray-50'
-          }`}
-          onClick={handleExport}
-          disabled={isLoading || isDetailedDataLoading}
-        >
-          <Download className="h-4 w-4" />
-          Export Excel
-        </button>
-      </div>
 
-        <div className="flex gap-2">
-        <button
-          className={`px-4 py-2 rounded-md ${
-            viewMode === 'chart' 
-              ? 'bg-blue-500 text-white' 
-              : 'border border-gray-300'
-          } flex-1`}
-          onClick={() => setViewMode('chart')}
-        >
-          Report
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md ${
-            viewMode === 'data' 
-              ? 'bg-blue-500 text-white' 
-              : 'border border-gray-300'
-          } flex-1 flex items-center justify-center gap-2`}
-          onClick={() => setViewMode('data')}
-        >
-          <Table className="h-4 w-4" />
-          Data
-        </button>
+        {/* Modern Toggle Buttons */}
+        <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
+          <button
+            className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
+              viewMode === 'chart' 
+                ? 'bg-white text-gray-800 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+            onClick={() => setViewMode('chart')}
+          >
+            Report View
+          </button>
+          <button
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
+              viewMode === 'data' 
+                ? 'bg-white text-gray-800 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+            onClick={() => setViewMode('data')}
+          >
+            <Table className="h-4 w-4" />
+            Detailed View
+          </button>
         </div>
       </div>
 
+      {/* Content Area */}
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8">
       {viewMode === 'chart' ? (
-        <div className="space-y-8">
+        <div className="space-y-12">
           {/* All Employees Chart */}
-          <div className="h-[400px]">
-            <h3 className="text-xl font-semibold mb-4">All Employees Distribution</h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData}
-                margin={{ top: 40, right: 30, left: 45, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" className="text-gray-300" />
-                <XAxis 
-                  dataKey="year"
-                  label={{ position: 'bottom', offset: -5 }}
-                />
-                <YAxis
-                  label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft', offset: -20 }}
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value}%`}
-                  ticks={[0, 25, 50, 75, 100]}
-                  allowDecimals={false}
-                />
-                <Tooltip 
-                  formatter={(value: number) => [`${value.toFixed(1)}%`]}
-                  contentStyle={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px'
-                  }}
-                />
-                <Legend verticalAlign="bottom" height={36} />
-                <Bar 
-                  dataKey="Male" 
-                  fill="#3b82f6"
-                  name="Male"
-                  radius={[4, 4, 0, 0]}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">All Employees Distribution</h3>
+            <p className="text-sm text-gray-600 mb-6">Gender distribution across all employee levels</p>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 20, right: 30, left: 45, bottom: 40 }}
                 >
-                  <LabelList
-                    dataKey="MaleCount"
-                    position="center"
-                    fill="white"
-                    style={{ fontWeight: 'bold' }}
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#E5E7EB"
+                    vertical={false}
                   />
-                </Bar>
-                <Bar 
-                  dataKey="Female" 
-                  fill="#ec4899"
-                  name="Female"
-                  radius={[4, 4, 0, 0]}
-                >
-                  <LabelList
-                    dataKey="FemaleCount"
-                    position="center"
-                    fill="white"
-                    style={{ fontWeight: 'bold' }}
+                  <XAxis 
+                    dataKey="year"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6B7280', fontSize: 12 }}
                   />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6B7280', fontSize: 12 }}
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                    ticks={[0, 25, 50, 75, 100]}
+                  />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(229, 231, 235, 0.3)' }}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: 'none',
+                      borderRadius: '0.75rem',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      padding: '12px 16px'
+                    }}
+                    formatter={(value: number, name: string) => {
+                      const label = name === 'Female' ? 'Women' : 'Men';
+                      return [`${value.toFixed(1)}%`, label];
+                    }}
+                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    height={36}
+                    formatter={(value) => (value === 'Female' ? 'Women' : 'Men')}
+                    wrapperStyle={{ paddingBottom: '20px' }}
+                  />
+                  <Bar 
+                    dataKey="Male" 
+                    fill="#3b82f6"
+                    name="Male"
+                    radius={[6, 6, 0, 0]}
+                  >
+                    <LabelList
+                      dataKey="MaleCount"
+                      position="center"
+                      fill="white"
+                      style={{ 
+                        fontWeight: 'bold', 
+                        fontSize: '12px',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.2)' 
+                      }}
+                    />
+                  </Bar>
+                  <Bar 
+                    dataKey="Female" 
+                    fill="#ec4899"
+                    name="Female"
+                    radius={[6, 6, 0, 0]}
+                  >
+                    <LabelList
+                      dataKey="FemaleCount"
+                      position="center"
+                      fill="white"
+                      style={{ 
+                        fontWeight: 'bold', 
+                        fontSize: '12px',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.2)' 
+                      }}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Managers Chart */}
-          <div className="h-[400px]">
-            <h3 className="text-xl font-semibold mb-4">Managers Distribution</h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={managerChartData}
-                margin={{ top: 40, right: 30, left: 45, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" className="text-gray-300" />
-                <XAxis 
-                  dataKey="year"
-                  label={{ position: 'bottom', offset: -5 }}
-                />
-                <YAxis
-                  label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft', offset: -20 }}
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value}%`}
-                  ticks={[0, 25, 50, 75, 100]}
-                  allowDecimals={false}
-                />
-                <Tooltip 
-                  formatter={(value: number) => [`${value.toFixed(1)}%`]}
-                  contentStyle={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px'
-                  }}
-                />
-                <Legend verticalAlign="bottom" height={36} />
-                <Bar 
-                  dataKey="Male" 
-                  fill="#3b82f6"
-                  name="Male"
-                  radius={[4, 4, 0, 0]}
-                >
-                  <LabelList
-                    dataKey="MaleCount"
-                    position="center"
-                    fill="white"
-                    style={{ fontWeight: 'bold' }}
-                  />
-                </Bar>
-                <Bar 
-                  dataKey="Female" 
-                  fill="#ec4899"
-                  name="Female"
-                  radius={[4, 4, 0, 0]}
-                >
-                  <LabelList
-                    dataKey="FemaleCount"
-                    position="center"
-                    fill="white"
-                    style={{ fontWeight: 'bold' }}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      ) : (
-        <div className="overflow-x-auto border rounded-lg">
-          {isDetailedDataLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            {/* Managers Chart */}
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Managers Distribution</h3>
+              <p className="text-sm text-gray-600 mb-6">Gender distribution at managerial level</p>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={managerChartData}
+                    margin={{ top: 20, right: 30, left: 45, bottom: 40 }}
+                  >
+                    <CartesianGrid 
+                      strokeDasharray="3 3" 
+                      stroke="#E5E7EB"
+                      vertical={false}
+                    />
+                    <XAxis 
+                      dataKey="year"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#6B7280', fontSize: 12 }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#6B7280', fontSize: 12 }}
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                      ticks={[0, 25, 50, 75, 100]}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: 'rgba(229, 231, 235, 0.3)' }}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: 'none',
+                        borderRadius: '0.75rem',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        padding: '12px 16px'
+                      }}
+                      formatter={(value: number, name: string) => {
+                        const label = name === 'Female' ? 'Women' : 'Men';
+                        return [`${value.toFixed(1)}%`, label];
+                      }}
+                      labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                    />
+                    <Legend 
+                      verticalAlign="top" 
+                      height={36}
+                      formatter={(value) => (value === 'Female' ? 'Women' : 'Men')}
+                      wrapperStyle={{ paddingBottom: '20px' }}
+                    />
+                    <Bar 
+                      dataKey="Male" 
+                      fill="#3b82f6"
+                      name="Male"
+                      radius={[6, 6, 0, 0]}
+                    >
+                      <LabelList
+                        dataKey="MaleCount"
+                        position="center"
+                        fill="white"
+                        style={{ 
+                          fontWeight: 'bold', 
+                          fontSize: '12px',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.2)' 
+                        }}
+                      />
+                    </Bar>
+                    <Bar 
+                      dataKey="Female" 
+                      fill="#ec4899"
+                      name="Female"
+                      radius={[6, 6, 0, 0]}
+                    >
+                      <LabelList
+                        dataKey="FemaleCount"
+                        position="center"
+                        fill="white"
+                        style={{ 
+                          fontWeight: 'bold', 
+                          fontSize: '12px',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.2)' 
+                        }}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Employee</th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">Employment Date</th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">Status</th>
-                  {years.map(year => (
-                    <th key={year} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                      {year}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {detailedData
-                  .filter(employee => employee.company === company)
-                  .map((employee) => {
-                    const hasChanges = [
-                      employee.gender_2021,
-                      employee.gender_2022,
-                      employee.gender_2023,
-                      employee.gender_2024,
-                    ].some((value, index, array) => 
-                      index > 0 && value !== array[index - 1]
-                    );
-                    
-                    return (
-                      <tr 
-                        key={employee.employee_id}
-                        className={`hover:bg-gray-50 ${hasChanges ? 'bg-yellow-50' : ''}`}
-                      >
-                        <td className="px-4 py-1">
-                          ID {employee.employee_id}: {employee.full_name}
-                        </td>
-                        <td className="px-4 py-1 text-center text-gray-600">
-                          {employee.employment_date}
-                        </td>
-                        <td className={`px-4 py-1 text-center ${
-                          employee.status === 'Active' ? 'text-green-600' : 'text-gray-600'
+          </div>
+        ) : (
+          <div className="overflow-x-auto border rounded-lg">
+            {isDetailedDataLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Employee</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">Employment Date</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">Status</th>
+                    {years.map(year => (
+                      <th key={year} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                        {year}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {detailedData.map((employee) => (
+                    <tr 
+                      key={employee.employee_id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-2">
+                        ID {employee.employee_id}: {employee.full_name}
+                      </td>
+                      <td className="px-4 py-2 text-center text-gray-600">
+                        {employee.employment_date}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          employee.status === 'Active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
                         }`}>
                           {employee.status}
+                        </span>
+                      </td>
+                      {['2021', '2022', '2023', '2024'].map((year) => (
+                        <td key={year} className="px-4 py-2 text-center">
+                          {employee[`gender_${year}`]}
                         </td>
-                        <td className={`px-4 py-1 text-center ${
-                          employee.gender_2022 !== employee.gender_2021 ? 'bg-yellow-100' : ''
-                        }`}>{employee.gender_2021}</td>
-                        <td className={`px-4 py-1 text-center ${
-                          employee.gender_2023 !== employee.gender_2022 ? 'bg-yellow-100' : ''
-                        }`}>{employee.gender_2022}</td>
-                        <td className={`px-4 py-1 text-center ${
-                          employee.gender_2024 !== employee.gender_2023 ? 'bg-yellow-100' : ''
-                        }`}>{employee.gender_2023}</td>
-                        <td className="px-4 py-1 text-center">{employee.gender_2024}</td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
 export default GenderDistributionChart;

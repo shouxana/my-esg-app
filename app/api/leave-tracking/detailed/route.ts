@@ -1,5 +1,3 @@
-// app/api/leave-tracking/detailed/route.ts
-
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
@@ -21,8 +19,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const currentYear = new Date().getFullYear();
-    const years = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear];
+    const years = [2021, 2022, 2023, 2024];
 
     const query = `
       WITH RECURSIVE last_four_years AS (
@@ -38,29 +35,29 @@ export async function GET(request: Request) {
                   WHEN emp.termination_date IS NULL THEN 'Active'
                   ELSE TO_CHAR(emp.termination_date, 'YYYY-MM-DD')
               END as status,
-              year,
+              y.year,
               CASE 
                 WHEN emp.leave_date_start IS NOT NULL 
-                AND EXTRACT(YEAR FROM emp.leave_date_start) = year 
+                AND TO_CHAR(emp.leave_date_start, 'YYYY')::integer = y.year
                 THEN 
                   CASE 
                     WHEN emp.leave_date_end IS NULL THEN
-                      EXTRACT(DAY FROM (CURRENT_DATE - emp.leave_date_start))
+                      (CURRENT_DATE - emp.leave_date_start)::integer
                     ELSE
-                      EXTRACT(DAY FROM (emp.leave_date_end - emp.leave_date_start))
+                      (emp.leave_date_end - emp.leave_date_start)::integer
                   END
                 ELSE NULL
               END as leave_duration,
               CASE 
                 WHEN emp.leave_date_start IS NOT NULL 
-                AND EXTRACT(YEAR FROM emp.leave_date_start) = year
+                AND TO_CHAR(emp.leave_date_start, 'YYYY')::integer = y.year
                 THEN TRUE
                 ELSE FALSE
               END as has_leave,
               CASE 
                 WHEN emp.leave_date_start IS NOT NULL 
                 AND emp.leave_date_end IS NULL
-                AND EXTRACT(YEAR FROM emp.leave_date_start) = year
+                AND TO_CHAR(emp.leave_date_start, 'YYYY')::integer = y.year
                 THEN TRUE
                 ELSE FALSE
               END as is_ongoing
@@ -68,10 +65,13 @@ export async function GET(request: Request) {
           JOIN "Gender" g ON emp.gender_id = g.gender_id
           CROSS JOIN last_four_years y
           WHERE 
-              EXTRACT(YEAR FROM emp.employment_date) <= year
-              AND (emp.termination_date IS NULL OR EXTRACT(YEAR FROM emp.termination_date) >= year)
+              TO_CHAR(emp.employment_date, 'YYYY')::integer <= y.year
+              AND (
+                emp.termination_date IS NULL 
+                OR TO_CHAR(emp.termination_date, 'YYYY')::integer >= y.year
+              )
               AND LOWER(emp.company) = LOWER($2)
-          ORDER BY emp.employee_id, year
+          ORDER BY emp.employee_id, y.year
       ),
       yearly_stats AS (
           SELECT

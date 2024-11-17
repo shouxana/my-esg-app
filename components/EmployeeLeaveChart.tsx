@@ -636,4 +636,3 @@ const LeaveTrackingChart: React.FC<LeaveTrackingChartProps> = ({ company }) => {
 };
 
 export default LeaveTrackingChart;
-

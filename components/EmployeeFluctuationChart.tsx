@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Download, Table, Loader2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Download, Table, Loader2, TrendingUp, TrendingDown, Minus, X } from 'lucide-react';
 
 interface FluctuationData {
   [year: number]: {
@@ -217,256 +217,272 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
       }
 
       return (
-        <div className="w-full">
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex justify-between items-center">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Employee Fluctuation
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Company: {company.toUpperCase()}
-                </p>
+        <div className="space-y-6">
+          {/* Header Section */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-2xl font-bold text-gray-800">Employee Fluctuation</h2>
+                  <div className="relative group">
+                    <div className="bg-purple-600 rounded p-1">
+                      <svg 
+                        viewBox="0 0 100 100" 
+                        className="h-[1em] w-[1em] cursor-help" 
+                        role="img"
+                        aria-label="SDG Goal 8 - Decent Work and Economic Growth"
+                      >
+                        <rect width="100" height="100" fill="#A21942"/>
+                        <path d="M25 65h50v8H25zm0-15h50v8H25zm0-15h50v8H25z" fill="white"/>
+                      </svg>
+                    </div>
+                    <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
+                      SDG Goal 8 - Decent Work and Economic Growth
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">Company: {company.toUpperCase()}</p>
               </div>
               <button
-                className="px-4 py-2 rounded-md flex items-center gap-2 border border-gray-300 hover:bg-gray-50"
                 onClick={handleExport}
+                className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
               >
                 <Download className="h-4 w-4" />
                 Export Excel
               </button>
             </div>
     
-            <div className="flex gap-2">
+            {/* Modern Toggle Buttons */}
+            <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
               <button
-                className={`px-4 py-2 rounded-md ${
+                className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
                   viewMode === 'chart' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'border border-gray-300'
-                } flex-1`}
+                    ? 'bg-white text-gray-800 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
                 onClick={() => setViewMode('chart')}
               >
-                Report
+                Report View
               </button>
               <button
-                className={`px-4 py-2 rounded-md ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
                   viewMode === 'data' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'border border-gray-300'
-                } flex-1 flex items-center justify-center gap-2`}
+                    ? 'bg-white text-gray-800 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
                 onClick={() => setViewMode('data')}
               >
                 <Table className="h-4 w-4" />
-                Data
+                Detailed View
               </button>
             </div>
           </div>
-
-          {viewMode === 'chart' && (
-        <div className="overflow-x-auto border rounded-lg max-h-[70vh] overflow-y-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="p-4 text-center text-gray-600 font-semibold text-lg sticky left-0 bg-white">
-                  Category
-                </th>
-                {chartData.years.map((year) => (
-                  <th key={year} className="p-4 text-center text-gray-600 font-semibold text-lg">
-                    {year}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {chartData.categories.map((category, idx) => (
-                <tr
-                  key={category}
-                  className={`${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
-                >
-                  <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit">
-                    {category}
-                  </td>
-                  {chartData.years.map((year, yearIdx) => {
-                    const value = chartData.data[year]?.[category] || 0;
-                    return (
-                      <td key={`${year}-${category}`} className="p-4">
-                        <div className="relative h-8 flex items-center group">
-                          <div className="relative z-10 w-full flex items-center justify-between px-2">
-                            <button
-                              onClick={() => handlePercentageClick(year, category)}
-                              className="text-gray-800 font-medium hover:text-blue-600"
-                            >
-                              {value.toFixed(1)}%
-                            </button>
-                            {getTrend(category, year, yearIdx)}
-                          </div>
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-{viewMode === 'data' && (
-        <div className="overflow-x-auto border rounded-lg">
-          {isDetailedLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 sticky left-0 bg-gray-50">
-                    Employee
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                    Employment Date
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                    Status
-                  </th>
-                  {chartData.years.map(year => (
-                    <th key={year} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                      {year}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {detailedData.map((employee) => {
-                  const hasChanges = [
-                    employee.age_group_2021,
-                    employee.age_group_2022,
-                    employee.age_group_2023,
-                    employee.age_group_2024,
-                  ].some((value, index, array) => 
-                    index > 0 && value !== array[index - 1]
-                  );
-
-                  return (
-                    <tr 
-                      key={employee.employee_id}
-                      className={`hover:bg-gray-50 ${hasChanges ? 'bg-yellow-50' : ''}`}
-                    >
-                      <td className="px-4 py-1 sticky left-0 bg-inherit">
-                      ID {employee.employee_id}: {employee.full_name}
-                      </td>
-                      <td className="px-4 py-1 text-center text-gray-600">
-                        {employee.employment_date}
-                      </td>
-                      <td className="px-4 py-1 text-center text-gray-600">
-                        {employee.status}
-                      </td>
-                      <td className="px-4 py-1 text-center">
-                        {employee.age_group_2021}
-                      </td>
-                      <td className="px-4 py-1 text-center">
-                        {employee.age_group_2022}
-                      </td>
-                      <td className="px-4 py-1 text-center">
-                        {employee.age_group_2023}
-                      </td>
-                      <td className="px-4 py-1 text-center">
-                        {employee.age_group_2024}
-                      </td>
+    
+          {/* Content Area */}
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+            {viewMode === 'chart' ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="p-4 text-left text-gray-600 font-semibold sticky left-0 bg-gray-50">
+                        Age Group
+                      </th>
+                      {chartData.years.map((year) => (
+                        <th key={year} className="p-4 text-center text-gray-600 font-semibold">
+                          {year}
+                        </th>
+                      ))}
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {chartData.categories.map((category, idx) => (
+                      <tr
+                        key={category}
+                        className={`${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
+                      >
+                        <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit">
+                          {category}
+                        </td>
+                        {chartData.years.map((year, yearIdx) => {
+                          const value = chartData.data[year]?.[category] || 0;
+                          return (
+                            <td key={`${year}-${category}`} className="p-4">
+                              <div className="flex items-center justify-between gap-2">
+                                <button
+                                  onClick={() => handlePercentageClick(year, category)}
+                                  className="text-gray-800 font-medium hover:text-blue-600 transition-colors"
+                                >
+                                  {value.toFixed(1)}%
+                                </button>
+                                <div className="flex items-center gap-1">
+                                  {getTrend(category, year, yearIdx)}
+                                </div>
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                {isDetailedLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+                  </div>
+                ) : (
+                  <table className="w-full">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                          Employee
+                        </th>
+                        <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                          Employment Date
+                        </th>
+                        <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                          Status
+                        </th>
+                        {chartData.years.map(year => (
+                          <th key={year} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                            {year}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {detailedData.map((employee) => (
+                        <tr 
+                          key={employee.employee_id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-4 py-2">
+                            <div className="font-medium text-gray-900">
+                              ID {employee.employee_id}: {employee.full_name}
+                            </div>
+                          </td>
+                          <td className="px-4 py-2 text-center text-gray-600">
+                            {employee.employment_date}
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              employee.status === 'Active' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {employee.status}
+                            </span>
+                          </td>
+                          {['2021', '2022', '2023', '2024'].map((year) => (
+                            <td key={year} className="px-4 py-2 text-center text-gray-600">
+                              {employee[`age_group_${year}`]}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+          </div>
+    
+          {/* Enhanced Modal */}
+          {isPopupOpen && (
+            <div
+              ref={modalRef}
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+              onClick={() => setIsPopupOpen(false)}
+            >
+              <div
+                className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-800">
+                        {selectedCategory}
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        Year: {selectedYear} • Company: {company.toUpperCase()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsPopupOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                      <X className="h-5 w-5 text-gray-500" />
+                    </button>
+                  </div>
+    
+                  {isEmployeeDataLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+                    </div>
+                  ) : employeeData && employeeData.length > 0 ? (
+                    <div className="max-h-[60vh] overflow-y-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                              Employee
+                            </th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                              Employment Date
+                            </th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                              Age
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {employeeData.map((employee) => (
+                            <tr 
+                              key={employee.employee_id}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-4 py-3">
+                                <div className="font-medium text-gray-900">{employee.full_name}</div>
+                                <div className="text-sm text-gray-500">ID: {employee.employee_id}</div>
+                              </td>
+                              <td className="px-4 py-3 text-center text-gray-600">
+                                {employee.employment_date}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <span className={`px-3 py-1 rounded-full text-sm ${
+                                  employee.status === 'Active'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {employee.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-center text-gray-600">
+                                {employee.age_in_year}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500">No employees found in this category.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
-      )}
-
-{isPopupOpen && (
-  <div
-    ref={modalRef}
-    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-    onClick={() => setIsPopupOpen(false)}
-    tabIndex={-1}
-  >
-    <div
-      className="bg-white rounded-lg p-6 w-[800px] max-w-full"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">
-          Employees in category {selectedCategory} for {selectedYear}
-        </h2>
-        <div className="text-sm text-gray-500">
-          Company: {company.toUpperCase()}
-        </div>
-      </div>
-
-      {isEmployeeDataLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        </div>
-      ) : employeeData && employeeData.length > 0 ? (
-        <div className="max-h-[400px] overflow-y-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
-              <tr>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                  Employee
-                </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
-                  Employment Date
-                </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
-                  Status
-                </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">
-                  Age
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {employeeData.map((employee) => (
-                <tr 
-                  key={employee.employee_id}
-                  className="hover:bg-gray-50"
-                >
-                  <td className="px-3 py-1">
-                    {employee.full_name}
-                  </td>
-                  <td className="px-3 py-1 text-center text-gray-600">
-                    {employee.employment_date}
-                  </td>
-                  <td className={`px-4 py-1 text-center ${
-                    employee.status === 'Active' ? 'text-green-600' : 'text-gray-600'
-                  }`}>
-                    {employee.status}
-                  </td>
-                  <td className="px-4 py-1 text-center text-gray-600">
-                    {employee.age_in_year}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="text-center text-gray-500">
-          No employees found in this category.
-        </p>
-      )}
-      <button
-        className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-        onClick={() => setIsPopupOpen(false)}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-    </div>
-  );
-};
-
-export default EmployeeFluctuationChart;
+      );
+    };
+    
+    export default EmployeeFluctuationChart;

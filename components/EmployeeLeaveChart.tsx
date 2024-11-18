@@ -27,8 +27,8 @@ interface DetailedEmployee {
   employment_date: string;
   status: string;
   gender: string;
-  leave_start_date: string | null;
-  leave_end_date: string | null;
+  leave_date_start: string | null;
+  leave_date_end: string | null;
   leave_duration: number;
   is_ongoing: boolean;
 }
@@ -328,201 +328,214 @@ const LeaveTrackingChart: React.FC<LeaveTrackingChartProps> = ({ company }) => {
   }
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex justify-between items-center">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Leave Tracking by Gender
-            </h2>
-            <p className="text-sm text-gray-600">
-              Company: {company.toUpperCase()}
-            </p>
-          </div>
-          <button
-            className="px-4 py-2 rounded-md flex items-center gap-2 border border-gray-300 hover:bg-gray-50"
-            onClick={handleExport}
-          >
-            <Download className="h-4 w-4" />
-            Export Excel
-          </button>
+    <div className="space-y-8">
+    {/* Header Section - Updated to match Education chart */}
+    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            Leave Tracking by Gender
+            <svg 
+              viewBox="0 0 100 100" 
+              className="h-[1em] w-[1em] cursor-help" 
+              role="img"
+              aria-label="SDG Goal 5 - Gender Equality"
+            >
+              <rect width="100" height="100" fill="#FF3A21"/>
+              <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
+              <rect x="46" y="59" width="8" height="14" fill="white"/>
+              <rect x="38" y="67" width="24" height="8" fill="white"/>
+            </svg>
+          </h2>
         </div>
-
-        <div className="flex gap-2">
-          <button
-            className={`px-4 py-2 rounded-md ${
-              viewMode === 'chart' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-300'
-            } flex-1`}
-            onClick={() => setViewMode('chart')}
-          >
-            Report
-          </button>
-          <button
-            className={`px-4 py-2 rounded-md ${
-              viewMode === 'data' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-300'
-            } flex-1 flex items-center justify-center gap-2`}
-            onClick={() => setViewMode('data')}
-          >
-            <Table className="h-4 w-4" />
-            Data
-          </button>
-        </div>
+        <button
+          onClick={handleExport}
+          className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+        >
+          <Download className="h-4 w-4" />
+          Export Excel
+        </button>
       </div>
 
-      {viewMode === 'chart' && (
-        <div className="overflow-x-auto border rounded-lg max-h-[70vh] overflow-y-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="p-4 text-center text-gray-600 font-semibold text-lg sticky left-0 bg-white">
-                  Gender
-                </th>
-                {chartData.years.map((year) => (
-                  <th key={year} colSpan={2} className="text-center text-gray-600 font-semibold text-lg">
-                    <div className="px-4 py-2">{year}</div>
-                    <div className="grid grid-cols-2 text-sm border-t">
-                      <div className="px-4 py-2 border-r">Avg. Duration</div>
-                      <div className="px-4 py-2">Leave Count</div>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {chartData.categories.map((category, idx) => (
-                <tr
-                  key={category}
-                  className={`${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
-                >
-                  <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit">
-                    {category}
-                  </td>
-                  {chartData.years.map((year, yearIdx) => {
-                    const data = chartData.data[year]?.[category] || { 
-                        avgDuration: 0, 
-                        leaveCount: 0, 
-                        ongoingLeaves: 0 
-                      } as LeaveMetrics;
-                    return (
-                      <React.Fragment key={`${year}-${category}`}>
-                        <td className="p-4 border-r">
-                        <div className="relative h-8 flex items-center group">
-                            <div className="relative z-10 w-full flex items-center justify-between px-2">
-                            <button
-                                onClick={() => handlePercentageClick(year, category)}
-                                className="text-gray-800 font-medium hover:text-blue-600"
-                            >
-                                {data.avgDuration.toFixed(1)} days
-                            </button>
-                            {getTrend(category, year, yearIdx)}
-                            </div>
-                        </div>
-                        </td>
-                        <td className="p-4">
-                        <div className="relative h-8 flex items-center group">
-                            <div className="relative z-10 w-full flex items-center justify-between px-2">
-                            <button
-                                onClick={() => handlePercentageClick(year, category)}
-                                className="text-gray-800 font-medium hover:text-blue-600"
-                            >
-                                {data.leaveCount}
-                                {data.ongoingLeaves > 0 && (
-                                <span className="ml-2 text-yellow-600">
-                                    ({data.ongoingLeaves} ongoing)
-                                </span>
-                                )}
-                            </button>
-                            {getTrend(category, year, yearIdx)}
-                            </div>
-                        </div>
-                        </td>
-                      </React.Fragment>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Toggle Buttons - Updated to match Education chart */}
+      <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
+        <button
+          className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
+            viewMode === 'chart' 
+              ? 'bg-white text-gray-800 shadow-sm' 
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+          onClick={() => setViewMode('chart')}
+        >
+          Report View
+        </button>
+        <button
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
+            viewMode === 'data' 
+              ? 'bg-white text-gray-800 shadow-sm' 
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+          onClick={() => setViewMode('data')}
+        >
+          <Table className="h-4 w-4" />
+          Detailed View
+        </button>
+      </div>
+    </div>
 
-      {viewMode === 'data' && (
-        <div className="overflow-x-auto border rounded-lg">
-          {isDetailedLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 sticky left-0 bg-gray-50">
-                    Employee
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                    Employment Date
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                    Status
-                  </th>
-                  {chartData.years.map(year => (
-                    <th key={year} colSpan={2} className="text-center text-sm font-semibold text-gray-600">
-                      <div>{year}</div>
-                      <div className="grid grid-cols-2 text-xs mt-1">
-                        <div>Duration</div>
-                        <div>Count</div>
+      {/* Content Area */}
+<div className="bg-white rounded-lg shadow-lg border border-gray-200">
+  {viewMode === 'chart' ? (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="bg-gray-50 border-b border-gray-200">
+            <th className="p-4 text-left text-gray-600 font-semibold sticky left-0 bg-gray-50">
+              Gender
+            </th>
+            {chartData.years.map((year) => (
+              <th key={year} colSpan={2} className="text-center text-gray-600 font-semibold text-lg">
+                <div className="px-4 py-2">{year}</div>
+                <div className="grid grid-cols-2 text-sm border-t">
+                  <div className="px-4 py-2 border-r">Avg. Duration</div>
+                  <div className="px-4 py-2">Leave Count</div>
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.categories.map((category, idx) => (
+            <tr
+              key={`${category}-${idx}`}
+              className={`${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
+            >
+              <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit">
+                {category}
+              </td>
+              {chartData.years.map((year, yearIdx) => {
+                const data = chartData.data[year]?.[category] || { 
+                  avgDuration: 0, 
+                  leaveCount: 0, 
+                  ongoingLeaves: 0 
+                };
+                return (
+                  <React.Fragment key={`${year}-${category}`}>
+                    <td className="p-4 border-r">
+                      <div className="flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => handlePercentageClick(year, category)}
+                          className="text-gray-800 font-medium hover:text-blue-600 transition-colors"
+                        >
+                          {data.avgDuration.toFixed(1)} days
+                        </button>
+                        {getTrend(category, year, yearIdx)}
                       </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {detailedData.map((employee) => (
-                  <tr 
-                    key={employee.employee_id}
-                    className="hover:bg-gray-50"
-                  >
-                    <td className="px-4 py-1 sticky left-0 bg-inherit">
-                      ID {employee.employee_id}: {employee.full_name}
                     </td>
-                    <td className="px-4 py-1 text-center text-gray-600">
-                      {employee.employment_date}
+                    <td className="p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => handlePercentageClick(year, category)}
+                          className="text-gray-800 font-medium hover:text-blue-600 transition-colors"
+                        >
+                          {data.leaveCount}
+                          {data.ongoingLeaves > 0 && (
+                            <span className="ml-2 text-yellow-600">
+                              ({data.ongoingLeaves} ongoing)
+                            </span>
+                          )}
+                        </button>
+                        {getTrend(category, year, yearIdx)}
+                      </div>
                     </td>
-                    <td className="px-4 py-1 text-center text-gray-600">
-                      {employee.status}
-                    </td>
-                    {chartData.years.map(year => {
-                      const yearData = (employee[`leave_${year}` as keyof DetailedLeaveData] as YearlyLeaveData | null);
-                      return yearData ? (
-                        <React.Fragment key={year}>
-                          <td className="px-4 py-1 text-center">
-                            {yearData.duration.toFixed(1)}
-                            {yearData.ongoing && (
-                              <span className="ml-1 text-yellow-600">*</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-1 text-center">
-                            {yearData.count}
-                          </td>
-                        </React.Fragment>
-                      ) : (
-                        <React.Fragment key={year}>
-                          <td className="px-4 py-1 text-center">-</td>
-                          <td className="px-4 py-1 text-center">-</td>
-                        </React.Fragment>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                  </React.Fragment>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <div className="overflow-x-auto">
+      {isDetailedLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         </div>
+      ) : (
+        <table className="w-full">
+          <thead className="bg-gray-50 sticky top-0">
+            <tr>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                Employee
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                Employment Date
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                Status
+              </th>
+              {chartData.years.map(year => (
+                <th key={year} colSpan={2} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                  <div>{year}</div>
+                  <div className="grid grid-cols-2 text-xs mt-1">
+                    <div>Duration</div>
+                    <div>Count</div>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {detailedData.map((employee) => (
+              <tr 
+                key={employee.employee_id}
+                className="hover:bg-gray-50"
+              >
+                <td className="px-4 py-2">
+                  ID {employee.employee_id}: {employee.full_name}
+                </td>
+                <td className="px-4 py-2 text-center text-gray-600">
+                  {employee.employment_date}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    employee.status === 'Active' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {employee.status}
+                  </span>
+                </td>
+                {chartData.years.map(year => {
+                  const yearData = employee[`leave_${year}`];
+                  return yearData ? (
+                    <React.Fragment key={year}>
+                      <td className="px-4 py-2 text-center">
+                        {yearData.duration.toFixed(1)}
+                        {yearData.ongoing && (
+                          <span className="ml-1 text-yellow-600">*</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        {yearData.count}
+                      </td>
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment key={year}>
+                      <td className="px-4 py-2 text-center">-</td>
+                      <td className="px-4 py-2 text-center">-</td>
+                    </React.Fragment>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
+    </div>
+  )}
+</div>
 
       {isPopupOpen && (
         <div
@@ -592,10 +605,10 @@ const LeaveTrackingChart: React.FC<LeaveTrackingChartProps> = ({ company }) => {
                           {employee.status}
                         </td>
                         <td className="px-4 py-1 text-center text-gray-600">
-                          {employee.leave_start_date}
+                          {employee.leave_date_start}
                         </td>
                         <td className="px-4 py-1 text-center text-gray-600">
-                          {employee.leave_end_date || (
+                          {employee.leave_date_end || (
                             <span className="text-yellow-600">Ongoing</span>
                           )}
                         </td>

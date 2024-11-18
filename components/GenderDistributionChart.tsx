@@ -232,46 +232,32 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
     <div className="space-y-6">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-2xl font-bold text-gray-800">Gender Distribution</h2>
-              <div className="relative group">
-                <div className="bg-red-600 rounded p-1">
-                  <svg 
-                    viewBox="0 0 100 100" 
-                    className="h-[1em] w-[1em] cursor-help" 
-                    role="img"
-                    aria-label="SDG Goal 5 - Gender Equality"
-                  >
-                    <rect width="100" height="100" fill="#FF3A21"/>
-                    <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
-                    <rect x="46" y="59" width="8" height="14" fill="white"/>
-                    <rect x="38" y="67" width="24" height="8" fill="white"/>
-                  </svg>
-                </div>
-                <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
-                  SDG Goal 5 - Gender Equality
-                </div>
-              </div>
-              <div className="relative group">
-                <div className="bg-pink-600 rounded p-1">
-                  <svg 
-                    viewBox="0 0 100 100" 
-                    className="h-[1em] w-[1em] cursor-help"
-                    role="img"
-                    aria-label="SDG Goal 10 - Reduced Inequalities"
-                  >
-                    <rect width="100" height="100" fill="#DD1367"/>
-                    <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
-                  </svg>
-                </div>
-                <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
-                  SDG Goal 10 - Reduced Inequalities
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            Gender Distribution
+            <svg 
+              viewBox="0 0 100 100" 
+              className="h-[1em] w-[1em] cursor-help" 
+              role="img"
+              aria-label="SDG Goal 5 - Gender Equality"
+            >
+              <rect width="100" height="100" fill="#FF3A21"/>
+              <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
+              <rect x="46" y="59" width="8" height="14" fill="white"/>
+              <rect x="38" y="67" width="24" height="8" fill="white"/>
+            </svg>
+            <svg 
+              viewBox="0 0 100 100" 
+              className="h-[1em] w-[1em] cursor-help"
+              role="img"
+              aria-label="SDG Goal 10 - Reduced Inequalities"
+            >
+              <rect width="100" height="100" fill="#DD1367"/>
+              <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
+            </svg>
+          </h2>
+        </div>
           <button
             onClick={handleExport}
             className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"

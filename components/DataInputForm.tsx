@@ -1392,28 +1392,30 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="mt-auto pt-6 flex space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setIsChangeLogOpen(true)}
-                  disabled={!selectedEmployee}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-                >
-                  View Change Log
-                </button>
-                <button
-                  type="submit"
-                  disabled={!selectedEmployee || isLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-                >
-                  {isLoading ? 
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Saving...</span>
-                    </div>
-                    : 'Save Changes'
-                  }
-                </button>
+              <div className="mt-auto pt-6">
+                <div className="space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsChangeLogOpen(true)}
+                    disabled={!selectedEmployee}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                  >
+                    View Change Log
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!selectedEmployee || isLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                  >
+                    {isLoading ? 
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Saving...</span>
+                      </div>
+                      : 'Save Changes'
+                    }
+                  </button>
+                </div>
               </div>
             </form>
           </div>

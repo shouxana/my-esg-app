@@ -46,6 +46,8 @@ interface Employee {
   birth_date: string;
   employment_date: string;
   termination_date: string | null;
+  leave_date_start: string | null;  
+  leave_date_end: string | null;    
   position_id: string;
   education_id: string;
   marital_status_id: string;
@@ -57,7 +59,7 @@ interface DetailedEmployeeData {
   employee_id: number;
   full_name: string;
   employment_date: string;
-  termination_date: string | null;  // Add this line
+  termination_date: string | null; 
   status: string;
   education_2021: string;
   education_2022: string;
@@ -506,6 +508,14 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
                               {!employee.termination_date ? 'Active' : 'Terminated'}
                             </span>
                           </td>
+                          <td className="px-4 py-3 text-center text-gray-600">
+                          {employee.leave_date_start && (
+                            <div>
+                              <div>From: {employee.leave_date_start}</div>
+                              <div>To: {employee.leave_date_end}</div>
+                            </div>
+                          )}
+                        </td>
                         </tr>
                       ))}
                     </tbody>
@@ -544,5 +554,4 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
 };
 
 export default EducationChart;
-
 

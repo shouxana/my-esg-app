@@ -164,6 +164,8 @@ export async function GET(request: Request) {
             e.birth_date::text AS birth_date,
             e.employment_date::text AS employment_date,
             e.termination_date::text AS termination_date,
+e.leave_date_Start::text AS leave_date_Start,
+e.leave_date_end::text AS leave_date_end,
             e.position_id,
             e.education_id,
             e.marital_status_id,

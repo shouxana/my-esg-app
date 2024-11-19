@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Leaf, Users, Scale } from 'lucide-react';
 import SocialTabs from './SocialTabs';
+import EnvironmentTabs from './EnvironmentTabs';
 import AuthScreen from './AuthScreen';
 
 interface ViewType {
@@ -140,16 +141,9 @@ const MainApp = () => {
             <SocialTabs company={userData?.company} />
           )}
 
-          {currentView === 'environmental' && (
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h1 className="text-2xl font-bold mb-4">Environmental Management</h1>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-green-800">
-                  Environmental management features coming soon.
-                </p>
-              </div>
-            </div>
-          )}
+{currentView === 'environmental' && (
+  <EnvironmentTabs company={userData?.company} />
+)}
 
           {currentView === 'governance' && (
             <div className="bg-white rounded-lg shadow-lg p-6">

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 type FormattedData = {
   years: number[];
   fleetData: any[];
@@ -10,9 +12,15 @@ type FormattedData = {
       value: number;
     }[];
   };
-  yearlyEmissions: any[];
+  yearlyEmissions: YearlyEmission[];
   vehicleTypes: string[];
 };
+
+interface YearlyEmission {
+  year: number;
+  Total: number;
+  [key: string]: number; // For dynamic vehicle type properties
+}
 
 export async function GET(request: Request) {
   try {
@@ -142,21 +150,25 @@ export async function GET(request: Request) {
 
       // Format yearly emissions
       years.forEach(year => {
-        const yearData = { year };
-        formattedData.vehicleTypes.forEach(type => yearData[type] = 0);
-        
-        emissionsResult.rows
-          .filter(row => row.year === year)
-          .forEach(row => {
-            yearData[row.vehicle_type] = parseFloat(row.emissions);
-          });
-        
-        yearData.Total = Object.values(yearData)
-          .filter(value => typeof value === 'number' && value !== year)
-          .reduce((sum: number, value: number) => sum + value, 0);
-        
-        formattedData.yearlyEmissions.push(yearData);
-      });
+  const yearData: YearlyEmission = { 
+    year,
+    Total: 0 // Initialize Total
+  };
+  
+  formattedData.vehicleTypes.forEach(type => yearData[type] = 0);
+  
+  emissionsResult.rows
+    .filter(row => row.year === year)
+    .forEach(row => {
+      yearData[row.vehicle_type] = parseFloat(row.emissions);
+    });
+  
+  yearData.Total = Object.values(yearData)
+    .filter(value => typeof value === 'number' && value !== year)
+    .reduce((sum: number, value: number) => sum + value, 0);
+  
+  formattedData.yearlyEmissions.push(yearData);
+});
 
       return NextResponse.json(formattedData);
 

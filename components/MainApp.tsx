@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Leaf, Users, Scale, LogOut } from 'lucide-react';
+import { Leaf, Users, Scale,LogOut } from 'lucide-react';
 import SocialTabs from './SocialTabs';
 import EnvironmentTabs from './EnvironmentTabs';
 import AuthScreen from './AuthScreen';

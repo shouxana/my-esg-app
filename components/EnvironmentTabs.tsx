@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { FormInput, BarChart2 } from 'lucide-react';
-import DataInputForm from './DataInputForm';
 import CO2EmissionsChart from './CO2EmissionsChart';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
 
 interface TabType {
   label: string;
@@ -68,7 +69,14 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
 
       <div className="mt-4">
         {activeTab === 'input' && company && (
-          <DataInputForm company={company} />
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Environmental Data Input</CardTitle>
+              <CardDescription>
+                Coming soon - Environmental metrics data input form
+              </CardDescription>
+            </CardHeader>
+          </Card>
         )}
         {activeTab === 'visuals' && company && (
           <div className="space-y-6">

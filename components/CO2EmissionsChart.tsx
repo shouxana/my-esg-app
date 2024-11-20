@@ -85,7 +85,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">{vehicleType}</p>
+              <p className="text-sm text-gray-500">{vehicleType} ({selectedYear})</p>
               <h3 className="text-2xl font-bold">{yearlyDistance.toLocaleString()} km</h3>
               {percentageChange && (
                 <p className={`text-sm ${Number(percentageChange) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -120,15 +120,23 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
                 <CardContent>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={fleetData} onClick={handleBarClick}>
+                    <BarChart data={fleetData.map(item => ({
+                        ...item,
+                        opacity: item.year.toString() === selectedYear ? 1 : 0.3
+                        }))} onClick={handleBarClick}>
                         <XAxis dataKey="year" />
                         <YAxis />
                         <Tooltip />
                         <Legend />
                         {vehicleTypes && vehicleTypes.length > 0 && vehicleTypes.map(type => (
-                          <Bar key={type} dataKey={type} fill={COLORS[type]} />
+                            <Bar 
+                            key={type} 
+                            dataKey={type}
+                            fill={COLORS[type]}
+                            opacity={0.3}
+                            />
                         ))}
-                      </BarChart>
+                    </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
@@ -139,7 +147,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">
-                    CO2 Emissions Distribution {selectedYear}
+                    CO2 Emissions Distribution ({selectedYear})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -151,11 +159,11 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
                             data={emissionsData[selectedYear]}
                             innerRadius={80}
                             outerRadius={110}
-                            paddingAngle={3}
+                            paddingAngle={0}
                             dataKey="value"
                             cx="35%"
                             onClick={handlePieClick}
-                            onMouseDown={(e) => e.preventDefault()}
+             
                             activeShape={null}
                           >
                             {emissionsData[selectedYear]?.map((entry, index) => (

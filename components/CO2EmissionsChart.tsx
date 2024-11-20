@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { AlertCircle, Car } from 'lucide-react';
+import { AlertCircle, Car, Loader2 } from 'lucide-react';
 
 interface CO2EmissionsChartProps {
   company: string;
@@ -105,8 +105,15 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
     };
 
     if (isLoading) {
-      return <div className="p-4">Loading emissions data...</div>;
-    }
+        return (
+          <div className="w-full h-64 flex items-center justify-center">
+            <div className="text-gray-600 animate-pulse flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Loading...
+            </div>
+          </div>
+        );
+      }
 
     return (
       <Card className="w-full">

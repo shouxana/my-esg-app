@@ -25,20 +25,33 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
       </div>
 
       {/* Quick Actions Bar */}
-      <div className="flex gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="flex-1 flex gap-4">
-          <Button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition-colors">
             <Upload className="h-4 w-4" />
-            Bulk Import
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+            <span>Bulk Import</span>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+            />
+          </label>
+
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+          >
             <Download className="h-4 w-4" />
             Download Template
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+          </button>
+
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+          >
             <History className="h-4 w-4" />
             View Change Log
-          </Button>
+          </button>
         </div>
       </div>
 

@@ -82,7 +82,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
         null;
 
       return (
-        <Card className="p-4">
+        <Card className="p-4 w-full bg-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">{vehicleType} ({selectedYear})</p>
@@ -112,7 +112,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-1">
+            <div className="col-span-1 bg-white">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">Fleet Distribution by Type</CardTitle>
@@ -143,7 +143,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
               </Card>
             </div>
 
-            <div className="col-span-1">
+            <div className="col-span-1 bg-white">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">
@@ -210,7 +210,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
               </div>
             </div>
 
-            <div className="col-span-2">
+            <div className="col-span-2 bg-white">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center text-sm font-medium">
@@ -233,13 +233,26 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
                 <CardContent>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={filteredEmissions}>
+                    <LineChart data={filteredEmissions}>
                         <XAxis dataKey="year" />
                         <YAxis />
-                        <Tooltip />
+                        <Tooltip 
+                            formatter={(value: number) => Number(value).toFixed(2)}
+                            contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                            border: 'none'
+                            }}
+                        />
                         <Legend />
-                        <Line type="monotone" dataKey="emissions" stroke={vehicleFilter === 'all' ? '#800020' : COLORS[vehicleFilter]} strokeWidth={2}/>
-                      </LineChart>
+                        <Line 
+                            type="monotone" 
+                            dataKey="emissions" 
+                            stroke={vehicleFilter === 'all' ? '#800020' : COLORS[vehicleFilter]} 
+                            strokeWidth={2}
+                        />
+                    </LineChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>

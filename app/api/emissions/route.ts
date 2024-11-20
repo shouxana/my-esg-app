@@ -14,12 +14,17 @@ type FormattedData = {
   };
   yearlyEmissions: YearlyEmission[];
   vehicleTypes: string[];
+  distanceData: {
+    [year: number]: {
+      [vehicleType: string]: number;
+    };
+  };
 };
 
 interface YearlyEmission {
   year: number;
   Total: number;
-  [key: string]: number; // For dynamic vehicle type properties
+  [key: string]: number;
 }
 
 export async function GET(request: Request) {
@@ -33,7 +38,6 @@ export async function GET(request: Request) {
 
     const client = await pool.connect();
     try {
-      // First get current year and years array
       const currentYear = new Date().getFullYear();
       const years = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear];
 
@@ -104,18 +108,61 @@ export async function GET(request: Request) {
         ORDER BY lfy.year, vt.vehicle_type;
       `;
 
-      const [vehicleTypesResult, fleetResult, emissionsResult] = await Promise.all([
+      const distanceQuery = `
+        WITH last_four_years AS (
+          SELECT generate_series($1, $1 + 3) AS year
+        ),
+        vehicle_types AS (
+          SELECT vehicle_type_id, vehicle_type
+          FROM public."Vehicle_Type"
+        ),
+        yearly_distances AS (
+          SELECT 
+            EXTRACT(YEAR FROM r.information_dt)::integer as year,
+            vt.vehicle_type,
+            COALESCE(SUM(r.route_distance), 0) as total_distance
+          FROM public."Routes" r
+          JOIN public."Fleet" f ON r.vehicle_id = cast(f.vehicle_id as text)
+          JOIN vehicle_types vt ON f.vehicle_type_id = vt.vehicle_type_id
+          WHERE 
+            lower(f.company) = lower($2)
+            AND r.information_dt IS NOT NULL
+            AND r.route_distance IS NOT NULL
+          GROUP BY 
+            EXTRACT(YEAR FROM r.information_dt),
+            vt.vehicle_type
+        )
+        SELECT 
+          lfy.year,
+          vt.vehicle_type,
+          COALESCE(ROUND(yd.total_distance::numeric, 2), 0) as distance
+        FROM last_four_years lfy
+        CROSS JOIN vehicle_types vt
+        LEFT JOIN yearly_distances yd 
+          ON yd.year = lfy.year 
+          AND yd.vehicle_type = vt.vehicle_type
+        ORDER BY lfy.year, vt.vehicle_type;
+      `;
+
+      console.log('Company:', company);
+      console.log('Years:', years);
+
+      const [vehicleTypesResult, fleetResult, emissionsResult, distanceResult] = await Promise.all([
         client.query(vehicleTypesQuery),
         client.query(fleetQuery, [years[0], company]),
-        client.query(emissionsQuery, [years[0], company])
+        client.query(emissionsQuery, [years[0], company]),
+        client.query(distanceQuery, [years[0], company])
       ]);
+
+      console.log('Distance Result Rows:', distanceResult.rows);
 
       const formattedData: FormattedData = {
         years,
         fleetData: [],
         emissionsData: {},
         yearlyEmissions: [],
-        vehicleTypes: vehicleTypesResult.rows.map(row => row.vehicle_type)
+        vehicleTypes: vehicleTypesResult.rows.map(row => row.vehicle_type),
+        distanceData: {}
       };
 
       // Format fleet data
@@ -150,25 +197,44 @@ export async function GET(request: Request) {
 
       // Format yearly emissions
       years.forEach(year => {
-  const yearData: YearlyEmission = { 
-    year,
-    Total: 0 // Initialize Total
-  };
-  
-  formattedData.vehicleTypes.forEach(type => yearData[type] = 0);
-  
-  emissionsResult.rows
-    .filter(row => row.year === year)
-    .forEach(row => {
-      yearData[row.vehicle_type] = parseFloat(row.emissions);
-    });
-  
-  yearData.Total = Object.values(yearData)
-    .filter(value => typeof value === 'number' && value !== year)
-    .reduce((sum: number, value: number) => sum + value, 0);
-  
-  formattedData.yearlyEmissions.push(yearData);
-});
+        const yearData: YearlyEmission = { 
+          year,
+          Total: 0
+        };
+        
+        formattedData.vehicleTypes.forEach(type => yearData[type] = 0);
+        
+        emissionsResult.rows
+          .filter(row => row.year === year)
+          .forEach(row => {
+            yearData[row.vehicle_type] = parseFloat(row.emissions);
+          });
+        
+        yearData.Total = Object.values(yearData)
+          .filter(value => typeof value === 'number' && value !== year)
+          .reduce((sum: number, value: number) => sum + value, 0);
+        
+        formattedData.yearlyEmissions.push(yearData);
+      });
+
+      // Format distance data
+      years.forEach(year => {
+        formattedData.distanceData[year] = {};
+        
+        // Initialize all vehicle types with zero
+        vehicleTypesResult.rows.forEach(({ vehicle_type }) => {
+          formattedData.distanceData[year][vehicle_type] = 0;
+        });
+        
+        // Update with actual values
+        distanceResult.rows
+          .filter(row => row.year === year)
+          .forEach(row => {
+            formattedData.distanceData[year][row.vehicle_type] = parseFloat(row.distance) || 0;
+          });
+      });
+
+      console.log('Formatted Distance Data:', formattedData.distanceData);
 
       return NextResponse.json(formattedData);
 

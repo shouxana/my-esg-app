@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Car } from 'lucide-react';
 
 interface CO2EmissionsChartProps {
   company: string;
@@ -17,6 +17,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
     const [vehicleTypes, setVehicleTypes] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeType, setActiveType] = useState<string | null>(null);
+    const [distanceData, setDistanceData] = useState({});
 
     const handlePieClick = (_, index) => {
       setActiveType(emissionsData[selectedYear][index].name);
@@ -48,6 +49,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
           setEmissionsData(data.emissionsData);
           setYearlyEmissions(data.yearlyEmissions);
           setVehicleTypes(data.vehicleTypes);
+          setDistanceData(data.distanceData || {});
           if (data.years?.length > 0) {
             setSelectedYear(data.years[data.years.length - 1].toString());
           }
@@ -71,6 +73,33 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
       year: year.year,
       emissions: vehicleFilter === 'all' ? year.Total : year[vehicleFilter]
     }));
+
+    const DistanceCard = ({ vehicleType }) => {
+      const yearlyDistance = distanceData[selectedYear]?.[vehicleType] || 0;
+      const previousYearDistance = distanceData[Number(selectedYear) - 1]?.[vehicleType] || 0;
+      const percentageChange = previousYearDistance ? 
+        ((yearlyDistance - previousYearDistance) / previousYearDistance * 100).toFixed(1) : 
+        null;
+
+      return (
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">{vehicleType}</p>
+              <h3 className="text-2xl font-bold">{yearlyDistance.toLocaleString()} km</h3>
+              {percentageChange && (
+                <p className={`text-sm ${Number(percentageChange) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {Number(percentageChange) >= 0 ? '↑' : '↓'} {Math.abs(Number(percentageChange))}%
+                </p>
+              )}
+            </div>
+            <div className="p-2 rounded-full" style={{ backgroundColor: `${COLORS[vehicleType]}20` }}>
+              <Car size={24} style={{ color: COLORS[vehicleType] }} />
+            </div>
+          </div>
+        </Card>
+      );
+    };
 
     if (isLoading) {
       return <div className="p-4">Loading emissions data...</div>;
@@ -166,6 +195,14 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
             </div>
 
             <div className="col-span-2">
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                {vehicleTypes.map(type => (
+                  <DistanceCard key={type} vehicleType={type} />
+                ))}
+              </div>
+            </div>
+
+            <div className="col-span-2">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center text-sm font-medium">
@@ -193,7 +230,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="emissions" stroke="#8884d8" />
+                        <Line type="monotone" dataKey="emissions" stroke={vehicleFilter === 'all' ? '#800020' : COLORS[vehicleFilter]} strokeWidth={2}/>
                       </LineChart>
                     </ResponsiveContainer>
                   </div>

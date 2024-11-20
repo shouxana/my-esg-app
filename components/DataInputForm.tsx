@@ -1086,7 +1086,7 @@ useEffect(() => {
       {/* Header Section */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center gap-3 mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">Employee Data Management</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Social Data Management</h1>
           
         </div>
         <p className="text-sm text-gray-600">
@@ -1095,47 +1095,49 @@ useEffect(() => {
       </div>
 
       {/* Quick Actions Bar */}
-    <div className="flex gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="flex-1 flex gap-4">
-        <label className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition-colors">
-          <Upload className="h-4 w-4" />
-          <span>Bulk Import</span>
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleExcelImport}
-            className="hidden"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={downloadExcelTemplate}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          <Download className="h-4 w-4" />
-          Download Template
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (!selectedEmployee) {
-              setModalData({
-                type: 'ERROR',
-                title: 'No Employee Selected',
-                message: 'Please select an employee in the Update Employee section to view the change log.'
-              });
-              setIsModalOpen(true);
-            } else {
-              setIsChangeLogOpen(true);
-            }
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-        >
-          <Table className="h-4 w-4" />
-          View Change Log
-        </button>
-      </div>
-    </div>
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+  <div className="flex gap-4">
+    <label className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition-colors">
+      <Upload className="h-4 w-4" />
+      <span>Bulk Import</span>
+      <input
+        type="file"
+        accept=".xlsx,.xls"
+        onChange={handleExcelImport}
+        className="hidden"
+      />
+    </label>
+
+    <button
+      type="button"
+      onClick={downloadExcelTemplate}
+      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+    >
+      <Download className="h-4 w-4" />
+      Download Template
+    </button>
+
+    <button
+      type="button"
+      onClick={() => {
+        if (!selectedEmployee) {
+          setModalData({
+            type: 'ERROR',
+            title: 'No Employee Selected',
+            message: 'Please select an employee in the Update Employee section to view the change log.'
+          });
+          setIsModalOpen(true);
+        } else {
+          setIsChangeLogOpen(true);
+        }
+      }}
+      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+    >
+      <Table className="h-4 w-4" />
+      View Change Log
+    </button>
+  </div>
+</div>
 
       {/* Data Quality Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

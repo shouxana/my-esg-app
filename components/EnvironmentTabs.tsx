@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormInput, BarChart2 } from 'lucide-react';
 import CO2EmissionsChart from './CO2EmissionsChart';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-
+import EnvironmentalDataInput from './EnvironmentalDataInput';
 
 interface TabType {
   label: string;
@@ -17,7 +16,9 @@ interface EnvironmentTabsProps {
 }
 
 const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
-  const [activeTab, setActiveTab] = useState<'input' | 'visuals'>('visuals');
+  const [activeTab, setActiveTab] = useState<'input' | 'visuals'>('input');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const tabs: Record<'input' | 'visuals', TabType> = {
     input: {
@@ -32,10 +33,41 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
     },
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!company) {
+        setError('Company information is required');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        // Add your environmental data fetching logic here
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch environmental data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [company]);
+
   if (!company) {
     return (
       <div className="w-full p-4 text-yellow-600">
         Company information is required to view this data.
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full p-4 text-red-500">
+        Error loading data: {error}
       </div>
     );
   }
@@ -69,19 +101,22 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
 
       <div className="mt-4">
         {activeTab === 'input' && company && (
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Environmental Data Input</CardTitle>
-              <CardDescription>
-                Coming soon - Environmental metrics data input form
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <EnvironmentalDataInput company={company} />
         )}
-        {activeTab === 'visuals' && company && (
+        {activeTab === 'visuals' && !isLoading && company && (
           <div className="space-y-6">
             <CO2EmissionsChart company={company} />
             {/* Add other environmental charts here */}
+          </div>
+        )}
+        {activeTab === 'visuals' && isLoading && (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            Loading data...
+          </div>
+        )}
+        {activeTab === 'visuals' && !isLoading && !error && (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            No data available for {company.toUpperCase()}
           </div>
         )}
       </div>

@@ -19,6 +19,7 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
   const [activeTab, setActiveTab] = useState<'input' | 'visuals'>('input');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasData, setHasData] = useState(false);
 
   const tabs: Record<'input' | 'visuals', TabType> = {
     input: {
@@ -44,11 +45,19 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
       try {
         setIsLoading(true);
         setError(null);
-        // Add your environmental data fetching logic here
-        setIsLoading(false);
+        
+        // Fetch your environmental data here
+        const response = await fetch(`/api/emissions?company=${encodeURIComponent(company)}`);
+        if (!response.ok) throw new Error('Failed to fetch emissions data');
+        
+        const data = await response.json();
+        // Check if there's actual data
+        setHasData(data && Object.keys(data).length > 0);
+        
       } catch (err) {
         console.error('Failed to fetch environmental data:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      } finally {
         setIsLoading(false);
       }
     };
@@ -60,14 +69,6 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
     return (
       <div className="w-full p-4 text-yellow-600">
         Company information is required to view this data.
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full p-4 text-red-500">
-        Error loading data: {error}
       </div>
     );
   }
@@ -103,21 +104,23 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
         {activeTab === 'input' && company && (
           <EnvironmentalDataInput company={company} />
         )}
-        {activeTab === 'visuals' && !isLoading && company && (
-          <div className="space-y-6">
-            <CO2EmissionsChart company={company} />
-            {/* Add other environmental charts here */}
-          </div>
-        )}
-        {activeTab === 'visuals' && isLoading && (
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            Loading data...
-          </div>
-        )}
-        {activeTab === 'visuals' && !isLoading && !error && (
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            No data available for {company.toUpperCase()}
-          </div>
+        {activeTab === 'visuals' && (
+          <>
+            {isLoading ? (
+              <div className="h-64 flex items-center justify-center text-gray-500">
+                Loading data...
+              </div>
+            ) : error ? (
+              <div className="h-64 flex items-center justify-center text-red-500">
+                {error}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <CO2EmissionsChart company={company} />
+                {/* Add other environmental charts here */}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

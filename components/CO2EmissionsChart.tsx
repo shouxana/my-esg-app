@@ -70,9 +70,12 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
     };
 
     const filteredEmissions = yearlyEmissions.map(year => ({
-      year: year.year,
-      emissions: vehicleFilter === 'all' ? year.Total : year[vehicleFilter]
-    }));
+        year: year.year,
+        emissions: vehicleFilter === 'all' ? year.Total : year[vehicleFilter],
+        distance: vehicleFilter === 'all' 
+          ? Object.values(distanceData[year.year] || {}).reduce((sum: number, val: number) => sum + val, 0)
+          : distanceData[year.year]?.[vehicleFilter] || 0
+      }));
 
     const DistanceCard = ({ vehicleType }) => {
       const yearlyDistance = distanceData[selectedYear]?.[vehicleType] || 0;
@@ -234,25 +237,41 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={filteredEmissions}>
-                        <XAxis dataKey="year" />
-                        <YAxis />
-                        <Tooltip 
-                            formatter={(value: number) => Number(value).toFixed(2)}
-                            contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            borderRadius: '6px',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                            border: 'none'
-                            }}
-                        />
-                        <Legend />
-                        <Line 
-                            type="monotone" 
-                            dataKey="emissions" 
-                            stroke={vehicleFilter === 'all' ? '#800020' : COLORS[vehicleFilter]} 
-                            strokeWidth={2}
-                        />
-                    </LineChart>
+  <XAxis dataKey="year" />
+  <YAxis yAxisId="left" name="CO2 (kg)" />
+  <YAxis yAxisId="right" orientation="right" name="Distance (km)" />
+  <Tooltip 
+    formatter={(value: number, name: string) => {
+      if (name === "Distance") {
+        return [`${Number(value).toFixed(2)} km`, name];
+      }
+      return [`${Number(value).toFixed(2)} kg`, name];
+    }}
+    contentStyle={{ 
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: '6px',
+      boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+      border: 'none'
+    }}
+  />
+  <Legend />
+  <Line 
+    yAxisId="left"
+    type="monotone" 
+    dataKey="emissions" 
+    name="CO2 Emissions"
+    stroke={vehicleFilter === 'all' ? '#800020' : COLORS[vehicleFilter]} 
+    strokeWidth={2}
+  />
+  <Line 
+    yAxisId="right"
+    type="monotone" 
+    dataKey="distance" 
+    name="Distance"
+    stroke="#82ca9d" 
+    strokeWidth={2}
+  />
+</LineChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>

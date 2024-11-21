@@ -144,8 +144,7 @@ export async function GET(request: Request) {
         ORDER BY lfy.year, vt.vehicle_type;
       `;
 
-      console.log('Company:', company);
-      console.log('Years:', years);
+
 
       const [vehicleTypesResult, fleetResult, emissionsResult, distanceResult] = await Promise.all([
         client.query(vehicleTypesQuery),
@@ -154,7 +153,6 @@ export async function GET(request: Request) {
         client.query(distanceQuery, [years[0], company])
       ]);
 
-      console.log('Distance Result Rows:', distanceResult.rows);
 
       const formattedData: FormattedData = {
         years,
@@ -233,8 +231,6 @@ export async function GET(request: Request) {
             formattedData.distanceData[year][row.vehicle_type] = parseFloat(row.distance) || 0;
           });
       });
-
-      console.log('Formatted Distance Data:', formattedData.distanceData);
 
       return NextResponse.json(formattedData);
 

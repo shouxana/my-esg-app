@@ -9,7 +9,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     try {
       const { rows } = await client.query(
         `SELECT 
-          log_id,
+          id,
           changed_field,
           old_value,
           new_value,

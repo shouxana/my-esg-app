@@ -269,23 +269,49 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
       alert('Please select a vehicle');
       return;
     }
-
+  
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/fleet/${selectedVehicle}`, {
+      // Include company in the URL as a query parameter
+      const response = await fetch(`/api/fleet/${selectedVehicle}?company=${encodeURIComponent(company)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...updateFormData,
-          vehicle_type_id: parseInt(updateFormData.vehicle_type_id)
+          vehicle_type_id: parseInt(updateFormData.vehicle_type_id),
+          // Ensure dates are properly formatted or null if empty
+          production_date: updateFormData.production_date || null,
+          purchase_date: updateFormData.purchase_date || null,
+          sale_date: updateFormData.sale_date || null
         })
       });
-
-      if (!response.ok) throw new Error('Failed to update vehicle');
-
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update vehicle');
+      }
+  
+      const result = await response.json();
       alert('Vehicle updated successfully!');
-      const updatedVehicles = await fetch(`/api/fleet?company=${encodeURIComponent(company)}`).then(res => res.json());
+      
+      // Refresh vehicle list
+      const updatedVehicles = await fetch(`/api/fleet?company=${encodeURIComponent(company)}`).then(res => {
+        if (!res.ok) throw new Error('Failed to fetch updated vehicles');
+        return res.json();
+      });
+      
       setVehicles(updatedVehicles);
+      
+      // Reset form if needed
+      setSelectedVehicle('');
+      setUpdateFormData({
+        registration_number: '',
+        vehicle_type_id: '',
+        production_date: '',
+        purchase_date: '',
+        sale_date: '',
+        company
+      });
     } catch (error) {
       console.error('Error updating vehicle:', error);
       alert(`Failed to update vehicle: ${(error as Error).message}`);
@@ -294,6 +320,7 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
     }
   };
 
+  
   if (isLoading) {
     return (
       <div className="w-full h-64 flex items-center justify-center">

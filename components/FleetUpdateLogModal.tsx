@@ -9,6 +9,14 @@ interface FleetUpdateLogModalProps {
   company: string;
 }
 
+interface ChangeLogEntry {
+  id: number;
+  changed_field: string;
+  old_value: string | null;
+  new_value: string | null;
+  updated_at: string;
+}
+
 const FleetUpdateLogModal: React.FC<FleetUpdateLogModalProps> = ({
   isOpen,
   onClose,
@@ -16,7 +24,7 @@ const FleetUpdateLogModal: React.FC<FleetUpdateLogModalProps> = ({
   vehicleNumber,
   company,
 }) => {
-  const [changes, setChanges] = useState<any[]>([]);
+  const [changes, setChanges] = useState<ChangeLogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -25,10 +33,11 @@ const FleetUpdateLogModal: React.FC<FleetUpdateLogModalProps> = ({
       
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/fleet-logs/${vehicleId}?company=${encodeURIComponent(company)}`);
+        const response = await fetch(`/api/fleet-logs/${vehicleId}`);
         if (!response.ok) throw new Error('Failed to fetch change log');
         
         const data = await response.json();
+        console.log('Fetched change log data:', data);
         setChanges(data);
       } catch (error) {
         console.error('Error fetching change log:', error);
@@ -40,7 +49,28 @@ const FleetUpdateLogModal: React.FC<FleetUpdateLogModalProps> = ({
     if (isOpen && vehicleId) {
       fetchChanges();
     }
-  }, [isOpen, vehicleId, company]);
+  }, [isOpen, vehicleId]);
+
+  const formatValue = (value: string | null, field: string): string => {
+    if (value === null || value === '') return '-';
+    
+    // Format dates if the field is a date field
+    if (field.includes('date')) {
+      try {
+        const date = new Date(value);
+        return date.toLocaleDateString();
+      } catch {
+        return value;
+      }
+    }
+
+    // Format vehicle type changes to be more readable
+    if (field === 'vehicle_type_id') {
+      return `Type ${value}`;
+    }
+
+    return value;
+  };
 
   if (!isOpen) return null;
 
@@ -73,25 +103,29 @@ const FleetUpdateLogModal: React.FC<FleetUpdateLogModalProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {changes.map((change, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-2">{change.updated_at}</td>
-                    <td className="p-2">{change.changed_field}</td>
-                    <td className="p-2">{change.old_value || '-'}</td>
-                    <td className="p-2">{change.new_value || '-'}</td>
+                {changes.map((change) => (
+                  <tr key={change.id} className="border-b hover:bg-gray-50">
+                    <td className="p-2 text-sm">{change.updated_at}</td>
+                    <td className="p-2 text-sm font-medium">{change.changed_field}</td>
+                    <td className="p-2 text-sm text-gray-600">
+                      {formatValue(change.old_value, change.changed_field)}
+                    </td>
+                    <td className="p-2 text-sm text-gray-600">
+                      {formatValue(change.new_value, change.changed_field)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <div className="text-center text-gray-600">No changes logged</div>
+            <div className="text-center text-gray-600 py-8">No changes have been logged for this vehicle</div>
           )}
         </div>
 
         <div className="p-4 border-t flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
           >
             Close
           </button>

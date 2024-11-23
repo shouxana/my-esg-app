@@ -39,7 +39,7 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
     },
     {
       id: 'export' as const,
-      label: 'Export Report',
+      label: 'Generate Report',
       icon: FileText,
       color: 'bg-orange-600/50',
       hoverColor: 'hover:bg-orange-700',

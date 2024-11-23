@@ -1,13 +1,14 @@
 import React from 'react';
-import { Leaf, Users, Scale, FileText } from 'lucide-react';
+import { Leaf, Users, Scale, FileText, LogOut } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface LandingScreenProps {
   onViewSelect: (view: 'environmental' | 'social' | 'governance' | 'export') => void;
   userData: { email: string; company: string; } | null;
+  onLogout: () => void;
 }
 
-const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData }) => {
+const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, onLogout }) => {
   const views = [
     {
       id: 'environmental' as const,
@@ -40,7 +41,7 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData })
       id: 'export' as const,
       label: 'Export Report',
       icon: FileText,
-      color: 'bg-orange-600/50', // Reduced opacity for the icon background
+      color: 'bg-orange-600/50',
       hoverColor: 'hover:bg-orange-700',
       description: 'Generate and export comprehensive ESG reports based on your data.',
       isComingSoon: true
@@ -48,7 +49,18 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData })
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 relative">
+      {/* Logout Button */}
+      <div className="absolute top-4 left-4">
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Logout</span>
+        </button>
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Welcome Section */}
         <div className="text-center mb-12">

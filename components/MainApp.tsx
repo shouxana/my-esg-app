@@ -118,7 +118,13 @@ const MainApp = ({ initialView }: MainAppProps) => {
   }
 
   if (showLanding) {
-    return <LandingScreen onViewSelect={handleViewSelect} userData={userData} />;
+    return (
+      <LandingScreen 
+        onViewSelect={handleViewSelect} 
+        userData={userData}
+        onLogout={handleLogout} 
+      />
+    );
   }
 
   return (

@@ -24,6 +24,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<UserData | null>(null);
 
+  const isDashboardRoute = pathname?.startsWith('/dashboard');
+
   useEffect(() => {
     const checkAuth = () => {
       const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
@@ -55,8 +57,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
     );
   }
 
-  // For auth pages, render without dashboard layout
-  if (!isAuthenticated || pathname === '/auth') {
+  // For auth pages or dashboard routes, render without global layout
+  if (!isAuthenticated || pathname === '/auth' || isDashboardRoute) {
     return (
       <html lang="en">
         <body className={inter.className}>{children}</body>
@@ -64,7 +66,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     );
   }
 
-  // For authenticated pages, render with dashboard layout
+  // For other authenticated pages, render with layout
   return (
     <html lang="en">
       <body className={inter.className}>

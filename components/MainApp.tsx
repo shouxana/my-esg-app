@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Leaf, Users, Scale,LogOut } from 'lucide-react';
+import { Leaf, Users, Scale, LogOut } from 'lucide-react';
 import SocialTabs from './SocialTabs';
 import EnvironmentTabs from './EnvironmentTabs';
 import AuthScreen from './AuthScreen';
+import LandingScreen from './LandingScreen';
+
+type ViewTypes = 'environmental' | 'social' | 'governance' | 'export';
 
 interface ViewType {
   label: string;
@@ -18,11 +21,16 @@ interface UserData {
   company: string;
 }
 
-const MainApp = () => {
-  const [currentView, setCurrentView] = useState<'environmental' | 'social' | 'governance'>('social');
+interface MainAppProps {
+  initialView?: string | null;
+}
+
+const MainApp = ({ initialView }: MainAppProps) => {
+  const [currentView, setCurrentView] = useState<ViewTypes>('social');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -34,6 +42,12 @@ const MainApp = () => {
         if (sessionIsLoggedIn === 'true' && sessionUserData) {
           setIsLoggedIn(true);
           setUserData(JSON.parse(sessionUserData));
+          
+          // If there's an initialView, set it after login
+          if (initialView) {
+            setCurrentView(initialView as ViewTypes);
+            setShowLanding(false);
+          }
         }
       } catch (error) {
         console.error('Error initializing app:', error);
@@ -43,23 +57,34 @@ const MainApp = () => {
     };
 
     initializeApp();
-  }, []);
+  }, [initialView]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('userData');
     setIsLoggedIn(false);
     setUserData(null);
+    setShowLanding(true);
   };
 
   const handleLoginSuccess = (userData: UserData) => {
     setIsLoggedIn(true);
     setUserData(userData);
+    setShowLanding(true);
     sessionStorage.setItem('isLoggedIn', 'true');
     sessionStorage.setItem('userData', JSON.stringify(userData));
   };
 
-  const views: Record<'environmental' | 'social' | 'governance', ViewType> = {
+  const handleViewSelect = (view: ViewTypes) => {
+    if (view === 'export') {
+      // Handle export view separately if needed
+      return;
+    }
+    setCurrentView(view);
+    setShowLanding(false);
+  };
+
+  const views: Record<Exclude<ViewTypes, 'export'>, ViewType> = {
     environmental: {
       label: 'Environmental',
       icon: Leaf,
@@ -92,9 +117,13 @@ const MainApp = () => {
     return <AuthScreen onAuthSuccess={handleLoginSuccess} />;
   }
 
+  if (showLanding) {
+    return <LandingScreen onViewSelect={handleViewSelect} userData={userData} />;
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar - Updated styling */}
+      {/* Sidebar */}
       <div className="w-64 bg-slate-800 text-white flex flex-col relative">
         {/* Top section with fixed height */}
         <div className="p-6">
@@ -114,7 +143,7 @@ const MainApp = () => {
               return (
                 <button
                   key={key}
-                  onClick={() => setCurrentView(key as typeof currentView)}
+                  onClick={() => setCurrentView(key as Exclude<ViewTypes, 'export'>)}
                   className={`
                     w-full p-3 rounded-lg flex items-center space-x-3 transition-all
                     ${currentView === key ? view.color : 'bg-slate-700/50 hover:bg-slate-700'}
@@ -128,8 +157,18 @@ const MainApp = () => {
           </div>
         </div>
 
-        {/* Logout button - Fixed at bottom */}
-        <div className="p-6 border-t border-slate-700">
+        {/* Home button */}
+        <div className="px-6 pb-2">
+          <button
+            onClick={() => setShowLanding(true)}
+            className="w-full p-3 rounded-lg flex items-center justify-center space-x-3 transition-all bg-slate-700/50 hover:bg-slate-700"
+          >
+            <span className="font-medium">Return Home</span>
+          </button>
+        </div>
+
+        {/* Logout button */}
+        <div className="p-6 pt-2 border-t border-slate-700">
           <button
             onClick={handleLogout}
             className="w-full p-3 rounded-lg flex items-center justify-center space-x-3 transition-all bg-red-600 hover:bg-red-700"

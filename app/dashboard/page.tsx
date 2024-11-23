@@ -1,14 +1,8 @@
 // app/dashboard/page.tsx
 'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
+import MainApp from '@/components/MainApp';  // Adjust the import path based on your file structure
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.push('/dashboard/environmental');
-  }, [router]);
-
-  return null;
+  return <MainApp />;
 }

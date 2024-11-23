@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { UserData } from '../types';
 
 interface AuthScreenProps {
@@ -6,12 +9,39 @@ interface AuthScreenProps {
 }
 
 const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkAuth = () => {
+      const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+      const userData = sessionStorage.getItem('userData');
+      
+      if (isLoggedIn && userData) {
+        try {
+          const parsedUserData = JSON.parse(userData);
+          onAuthSuccess(parsedUserData);
+          router.replace('/dashboard');
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          sessionStorage.removeItem('isLoggedIn');
+          sessionStorage.removeItem('userData');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [router, onAuthSuccess]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setIsLoading(true);
     
     try {
       const response = await fetch('/api/auth', {
@@ -32,15 +62,30 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
         if (!data.user.company) {
           throw new Error('Missing company information');
         }
+        
+        // Update history to prevent going back to login
+        window.history.replaceState(null, '', '/dashboard');
+        
         onAuthSuccess(data.user);
+        router.replace('/dashboard');
       } else {
         setError(data.error || 'Authentication failed');
       }
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -67,6 +112,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -84,15 +130,21 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-medium"
+            disabled={isLoading}
+            className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white font-medium
+              ${isLoading 
+                ? 'bg-blue-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+              }`}
           >
-            Sign In
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 

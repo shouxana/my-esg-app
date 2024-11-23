@@ -25,6 +25,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const [userData, setUserData] = useState<UserData | null>(null);
 
   const isDashboardRoute = pathname?.startsWith('/dashboard');
+  const isAuthRoute = pathname === '/auth' || pathname === '/register';
 
   useEffect(() => {
     const checkAuth = () => {
@@ -37,12 +38,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
       }
       setIsLoading(false);
 
-      if (!isLoggedIn && pathname !== '/auth' && !pathname.startsWith('/auth')) {
+      // Only redirect if not on auth or register page
+      if (!isLoggedIn && !isAuthRoute && pathname !== '/') {
         router.push('/auth');
       }
     };
     checkAuth();
-  }, [pathname, router]);
+  }, [pathname, router, isAuthRoute]);
 
   // Show loading spinner while checking auth
   if (isLoading) {
@@ -57,8 +59,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
     );
   }
 
-  // For auth pages or dashboard routes, render without global layout
-  if (!isAuthenticated || pathname === '/auth' || isDashboardRoute) {
+  // For auth pages, register pages, or dashboard routes, render without global layout
+  if (!isAuthenticated || isAuthRoute || isDashboardRoute) {
     return (
       <html lang="en">
         <body className={inter.className}>{children}</body>

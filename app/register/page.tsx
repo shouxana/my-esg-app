@@ -1,19 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthScreen from '@/components/AuthScreen';
+import RegisterScreen from '@/components/RegisterScreen';
 
-export default function AuthPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Check if user is already logged in
     const checkAuth = () => {
       const isUserLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
       setIsLoggedIn(isUserLoggedIn);
       setIsLoading(false);
-
+      
       if (isUserLoggedIn) {
         router.replace('/dashboard');
       }
@@ -21,12 +22,6 @@ export default function AuthPage() {
 
     checkAuth();
   }, [router]);
-
-  const handleAuthSuccess = (userData: { email: string; company: string }) => {
-    sessionStorage.setItem('userData', JSON.stringify(userData));
-    sessionStorage.setItem('isLoggedIn', 'true');
-    router.replace('/dashboard');
-  };
 
   if (isLoading) {
     return (
@@ -36,6 +31,6 @@ export default function AuthPage() {
     );
   }
 
-  // Only render AuthScreen if not logged in
-  return !isLoggedIn ? <AuthScreen onAuthSuccess={handleAuthSuccess} /> : null;
+  // Only render RegisterScreen if not logged in
+  return !isLoggedIn ? <RegisterScreen /> : null;
 }

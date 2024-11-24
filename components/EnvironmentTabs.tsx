@@ -71,7 +71,7 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
       color: 'text-emerald-600 border-emerald-600',
     },
     pdfs: {
-      label: 'PDF Documents',
+      label: 'Uploaded Documents',
       icon: FileText,
       color: 'text-emerald-600 border-emerald-600',
     },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Leaf, Users, Scale, FileText, LogOut } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
 
 interface LandingScreenProps {
   onViewSelect: (view: 'environmental' | 'social' | 'governance' | 'export') => void;
@@ -14,10 +15,10 @@ interface LandingScreenProps {
 }
 
 const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, onLogout }) => {
-  // Helper function to format name with proper encoding
+  const router = useRouter();
+
   const formatName = (name: string) => {
     try {
-      // Handle any potential decoding issues
       return decodeURIComponent(escape(name));
     } catch {
       return name;
@@ -26,6 +27,17 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
 
   const formattedFirstName = userData?.user_name ? formatName(userData.user_name) : '';
   const formattedLastName = userData?.user_lastname ? formatName(userData.user_lastname) : '';
+
+  const handleViewSelect = (viewId: 'environmental' | 'social' | 'governance' | 'export') => {
+    const selectedView = views.find(v => v.id === viewId);
+    if (selectedView && !selectedView.isComingSoon) {
+      onViewSelect(viewId);
+      // Update URL when selecting view from landing screen
+      const params = new URLSearchParams(window.location.search);
+      params.set('view', viewId);
+      router.push(`${window.location.pathname}?${params.toString()}`);
+    }
+  };
 
   const views = [
     {
@@ -68,7 +80,6 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {/* Logout Button */}
       <div className="absolute top-4 left-4">
         <button
           onClick={onLogout}
@@ -80,7 +91,6 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Welcome Section */}
         <div className="text-center mb-12">
           <div className="mb-6">
             <div className="w-20 h-20 bg-slate-800 rounded-xl mx-auto flex items-center justify-center">
@@ -98,7 +108,6 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
           </p>
         </div>
 
-        {/* Module Selection Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {views.map((view) => {
             const Icon = view.icon;
@@ -110,7 +119,7 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
                     ? 'cursor-not-allowed opacity-75 bg-gray-50' 
                     : 'hover:shadow-lg cursor-pointer'
                 }`}
-                onClick={() => !view.isComingSoon && onViewSelect(view.id)}
+                onClick={() => !view.isComingSoon && handleViewSelect(view.id)}
               >
                 <CardContent className="p-6">
                   <div className={`inline-flex p-3 rounded-lg ${view.color} mb-4 ${
@@ -140,7 +149,6 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
           })}
         </div>
 
-        {/* Company Info */}
         <div className="mt-12 text-center text-sm text-slate-500">
           <p>Reporting for: {userData?.company}</p>
         </div>

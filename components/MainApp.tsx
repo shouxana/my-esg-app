@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Leaf, Users, Scale, LogOut } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import SocialTabs from './SocialTabs';
 import EnvironmentTabs from './EnvironmentTabs';
 import AuthScreen from './AuthScreen';
@@ -28,13 +29,14 @@ interface MainAppProps {
 }
 
 const MainApp = ({ initialView }: MainAppProps) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [currentView, setCurrentView] = useState<ViewTypes>('social');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
 
-  // Helper function to format name with proper encoding
   const formatName = (name: string) => {
     try {
       return decodeURIComponent(escape(name));
@@ -43,9 +45,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
     }
   };
 
-  // Format user data before storing in session storage
   const storeUserData = (data: UserData) => {
-    // Ensure the data is properly encoded before storage
     const encodedData = {
       ...data,
       user_name: formatName(data.user_name),
@@ -57,17 +57,19 @@ const MainApp = ({ initialView }: MainAppProps) => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Check session storage
         const sessionIsLoggedIn = sessionStorage.getItem('isLoggedIn');
         const sessionUserData = sessionStorage.getItem('userData');
+        const viewFromUrl = searchParams.get('view') as ViewTypes;
         
         if (sessionIsLoggedIn === 'true' && sessionUserData) {
           const parsedUserData = JSON.parse(sessionUserData);
           setIsLoggedIn(true);
           setUserData(parsedUserData);
           
-          // If there's an initialView, set it after login
-          if (initialView) {
+          if (viewFromUrl) {
+            setCurrentView(viewFromUrl);
+            setShowLanding(false);
+          } else if (initialView) {
             setCurrentView(initialView as ViewTypes);
             setShowLanding(false);
           }
@@ -80,7 +82,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
     };
 
     initializeApp();
-  }, [initialView]);
+  }, [searchParams, initialView]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('isLoggedIn');
@@ -88,6 +90,8 @@ const MainApp = ({ initialView }: MainAppProps) => {
     setIsLoggedIn(false);
     setUserData(null);
     setShowLanding(true);
+    // Clear URL parameters on logout
+    router.push(window.location.pathname);
   };
 
   const handleLoginSuccess = (userData: UserData) => {
@@ -100,11 +104,14 @@ const MainApp = ({ initialView }: MainAppProps) => {
 
   const handleViewSelect = (view: ViewTypes) => {
     if (view === 'export') {
-      // Handle export view separately if needed
       return;
     }
     setCurrentView(view);
     setShowLanding(false);
+    // Update URL when view changes
+    const params = new URLSearchParams(window.location.search);
+    params.set('view', view);
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   const views: Record<Exclude<ViewTypes, 'export'>, ViewType> = {
@@ -150,15 +157,12 @@ const MainApp = ({ initialView }: MainAppProps) => {
     );
   }
 
-  // Format the names for display
   const formattedFirstName = userData?.user_name ? formatName(userData.user_name) : '';
   const formattedLastName = userData?.user_lastname ? formatName(userData.user_lastname) : '';
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <div className="w-64 bg-slate-800 text-white flex flex-col relative">
-        {/* Top section with fixed height */}
         <div className="p-6">
           <div className="space-y-2 mb-6">
             <h1 className="text-xl font-bold text-white/90 px-2">ESG Dashboard</h1>
@@ -168,7 +172,6 @@ const MainApp = ({ initialView }: MainAppProps) => {
           </div>
         </div>
 
-        {/* Navigation section with scrolling if needed */}
         <div className="flex-1 overflow-y-auto p-6 pt-0">
           <div className="space-y-3">
             {Object.entries(views).map(([key, view]) => {
@@ -176,7 +179,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
               return (
                 <button
                   key={key}
-                  onClick={() => setCurrentView(key as Exclude<ViewTypes, 'export'>)}
+                  onClick={() => handleViewSelect(key as Exclude<ViewTypes, 'export'>)}
                   className={`
                     w-full p-3 rounded-lg flex items-center space-x-3 transition-all
                     ${currentView === key ? view.color : 'bg-slate-700/50 hover:bg-slate-700'}
@@ -190,17 +193,19 @@ const MainApp = ({ initialView }: MainAppProps) => {
           </div>
         </div>
 
-        {/* Home button */}
         <div className="px-6 pb-2">
           <button
-            onClick={() => setShowLanding(true)}
+            onClick={() => {
+              setShowLanding(true);
+              // Clear view parameter when returning home
+              router.push(window.location.pathname);
+            }}
             className="w-full p-3 rounded-lg flex items-center justify-center space-x-3 transition-all bg-slate-700/50 hover:bg-slate-700"
           >
             <span className="font-medium">Return Home</span>
           </button>
         </div>
 
-        {/* Logout button */}
         <div className="p-6 pt-2 border-t border-slate-700">
           <button
             onClick={handleLogout}
@@ -212,7 +217,6 @@ const MainApp = ({ initialView }: MainAppProps) => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="p-8">
           {currentView === 'social' && (

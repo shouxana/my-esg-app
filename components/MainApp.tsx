@@ -19,6 +19,8 @@ interface ViewType {
 interface UserData {
   email: string;
   company: string;
+  user_name: string;
+  user_lastname: string;
 }
 
 interface MainAppProps {
@@ -32,6 +34,26 @@ const MainApp = ({ initialView }: MainAppProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
 
+  // Helper function to format name with proper encoding
+  const formatName = (name: string) => {
+    try {
+      return decodeURIComponent(escape(name));
+    } catch {
+      return name;
+    }
+  };
+
+  // Format user data before storing in session storage
+  const storeUserData = (data: UserData) => {
+    // Ensure the data is properly encoded before storage
+    const encodedData = {
+      ...data,
+      user_name: formatName(data.user_name),
+      user_lastname: formatName(data.user_lastname)
+    };
+    sessionStorage.setItem('userData', JSON.stringify(encodedData));
+  };
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -40,8 +62,9 @@ const MainApp = ({ initialView }: MainAppProps) => {
         const sessionUserData = sessionStorage.getItem('userData');
         
         if (sessionIsLoggedIn === 'true' && sessionUserData) {
+          const parsedUserData = JSON.parse(sessionUserData);
           setIsLoggedIn(true);
-          setUserData(JSON.parse(sessionUserData));
+          setUserData(parsedUserData);
           
           // If there's an initialView, set it after login
           if (initialView) {
@@ -72,7 +95,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
     setUserData(userData);
     setShowLanding(true);
     sessionStorage.setItem('isLoggedIn', 'true');
-    sessionStorage.setItem('userData', JSON.stringify(userData));
+    storeUserData(userData);
   };
 
   const handleViewSelect = (view: ViewTypes) => {
@@ -127,6 +150,10 @@ const MainApp = ({ initialView }: MainAppProps) => {
     );
   }
 
+  // Format the names for display
+  const formattedFirstName = userData?.user_name ? formatName(userData.user_name) : '';
+  const formattedLastName = userData?.user_lastname ? formatName(userData.user_lastname) : '';
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -136,7 +163,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
           <div className="space-y-2 mb-6">
             <h1 className="text-xl font-bold text-white/90 px-2">ESG Dashboard</h1>
             <div className="px-2 py-1 text-sm text-white/70">
-              <p>{userData?.email}</p>
+              <p>{formattedFirstName} {formattedLastName}</p>
             </div>
           </div>
         </div>

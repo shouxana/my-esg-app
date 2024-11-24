@@ -4,11 +4,29 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface LandingScreenProps {
   onViewSelect: (view: 'environmental' | 'social' | 'governance' | 'export') => void;
-  userData: { email: string; company: string; } | null;
+  userData: {
+    email: string;
+    company: string;
+    user_name: string;
+    user_lastname: string;
+  } | null;
   onLogout: () => void;
 }
 
 const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, onLogout }) => {
+  // Helper function to format name with proper encoding
+  const formatName = (name: string) => {
+    try {
+      // Handle any potential decoding issues
+      return decodeURIComponent(escape(name));
+    } catch {
+      return name;
+    }
+  };
+
+  const formattedFirstName = userData?.user_name ? formatName(userData.user_name) : '';
+  const formattedLastName = userData?.user_lastname ? formatName(userData.user_lastname) : '';
+
   const views = [
     {
       id: 'environmental' as const,
@@ -73,7 +91,7 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
             Welcome to ESG Dashboard
           </h1>
           <p className="text-lg text-slate-600 mb-2">
-            Hello, {userData?.email}
+            Hello, {formattedFirstName} {formattedLastName}
           </p>
           <p className="text-slate-600">
             Select a module below to start managing your ESG initiatives

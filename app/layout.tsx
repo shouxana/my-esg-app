@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import { Leaf, Users, Scale } from 'lucide-react';
 import Link from 'next/link';
 import './globals.css';
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <div className="min-h-screen flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
+          <Toaster />
         </body>
       </html>
     );
@@ -63,7 +65,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
   if (!isAuthenticated || isAuthRoute || isDashboardRoute) {
     return (
       <html lang="en">
-        <body className={inter.className}>{children}</body>
+        <body className={inter.className}>
+          {children}
+          <Toaster />
+        </body>
       </html>
     );
   }
@@ -126,6 +131,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </main>
           </div>
         </div>
+        <Toaster />
       </body>
     </html>
   );

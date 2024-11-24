@@ -1,7 +1,10 @@
 // types.ts (create this file to share types between components)
 export interface UserData {
-  id: string;
+  id?: number;
   email: string;
-  company: string;  // Required company field
-  // Add any other required fields
+  company: string;
+  user_name: string;
+  user_lastname: string;
+  created_at?: Date;
+  updated_at?: Date;
 }

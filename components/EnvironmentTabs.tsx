@@ -5,6 +5,8 @@ import { FormInput, BarChart2, FileText, Upload, X, Trash2, RefreshCw, Loader2 }
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { useSearchParams, useRouter } from 'next/navigation';
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -28,14 +30,16 @@ import EnvironmentalDataInput from './EnvironmentalDataInput';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 interface TabType {
-  label: string;
-  icon: React.ElementType;
-  color: string;
-}
-
-interface EnvironmentTabsProps {
-  company?: string;
-}
+    label: string;
+    icon: React.ElementType;
+    color: string;
+  }
+  
+  interface EnvironmentTabsProps {
+    company?: string;
+    searchParams: ReadonlyURLSearchParams;
+    router: ReturnType<typeof useRouter>;
+  }
 
 interface PDFFile {
   id: string;
@@ -47,8 +51,15 @@ interface PDFFile {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
-  const [activeTab, setActiveTab] = useState<'input' | 'visuals' | 'pdfs'>('input');
+const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams, router }) => {
+  // Initialize state from URL parameters
+  const [activeTab, setActiveTab] = useState<'input' | 'visuals' | 'pdfs'>(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl === 'input' || tabFromUrl === 'visuals' || tabFromUrl === 'pdfs') {
+      return tabFromUrl;
+    }
+    return 'input';
+  });
   const [pdfs, setPdfs] = useState<PDFFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +87,13 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
       color: 'text-emerald-600 border-emerald-600',
     },
   };
+  // Add useEffect to handle URL changes
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl === 'input' || tabFromUrl === 'visuals' || tabFromUrl === 'pdfs') {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   const fetchPDFs = async () => {
     if (!company) {
@@ -174,6 +192,20 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
       setUploadProgress(0);
       event.target.value = '';
     }
+  };
+
+  const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
+    setActiveTab(tab);
+    
+    // Update URL while preserving other parameters
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', tab);
+    // Preserve the view parameter
+    const currentView = params.get('view');
+    if (currentView) {
+      params.set('view', currentView);
+    }
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   const handleViewPdf = (pdf: PDFFile) => {
@@ -394,7 +426,7 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company }) => {
               return (
                 <button
                   key={key}
-                  onClick={() => setActiveTab(key as typeof activeTab)}
+                  onClick={() => handleTabChange(key as typeof activeTab)}
                   className={`
                     group inline-flex items-center py-3 px-4 rounded-md font-medium text-sm transition-colors
                     ${activeTab === key

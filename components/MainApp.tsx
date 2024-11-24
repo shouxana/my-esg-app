@@ -219,22 +219,26 @@ const MainApp = ({ initialView }: MainAppProps) => {
 
       <div className="flex-1 overflow-auto">
         <div className="p-8">
-          {currentView === 'social' && (
-            <SocialTabs company={userData?.company} />
-          )}
-          {currentView === 'environmental' && (
-            <EnvironmentTabs company={userData?.company} />
-          )}
-          {currentView === 'governance' && (
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h1 className="text-2xl font-bold mb-4">Governance Management</h1>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <p className="text-sm text-purple-800">
-                  Governance management features coming soon.
-                </p>
-              </div>
+        {currentView === 'social' && (
+          <SocialTabs company={userData?.company} />
+        )}
+        {currentView === 'environmental' && (
+          <EnvironmentTabs 
+            company={userData?.company} 
+            searchParams={searchParams}
+            router={router}
+          />
+        )}
+        {currentView === 'governance' && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h1 className="text-2xl font-bold mb-4">Governance Management</h1>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <p className="text-sm text-purple-800">
+                Governance management features coming soon.
+              </p>
             </div>
-          )}
+          </div>
+        )}
         </div>
       </div>
     </div>

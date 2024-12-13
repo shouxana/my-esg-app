@@ -337,10 +337,10 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
       {/* Header Section */}
       <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center gap-3 mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">Fleet Management</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Environmental Data Management</h1>
         </div>
         <p className="text-sm text-gray-600">
-          Track and manage fleet data for {company.toUpperCase()}
+          Track and manage CO2 emmisions, fleet and utilities data for {company.toUpperCase()}
         </p>
       </div>
 

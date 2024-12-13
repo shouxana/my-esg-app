@@ -413,20 +413,33 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
         </div>
       </div>
 
+       {/* Tab Content */}
       <div className="mt-4">
-  {activeTab === 'input' && (
-    <DataInputForm company={company} />
-  )}
-  {activeTab === 'visuals' && (
-    <div className="space-y-6">
-      <EducationChart company={company} />
-      <GenderDistributionChart years={years} company={company} />
-      <EmployeeFluctuationChart company={company} />
-      <LeaveTrackingChart company={company} />
-    </div>
-  )}
-  {activeTab === 'pdfs' && <PDFManagement />}
-</div>
+        {activeTab === 'input' && company && (
+          <DataInputForm company={company} />
+        )}
+        {activeTab === 'visuals' && !isLoading && years.length > 0 && company && (
+          <div className="space-y-6">
+            <EducationChart company={company} />
+            <GenderDistributionChart years={years} company={company} />
+            <EmployeeFluctuationChart company={company} />
+            <LeaveTrackingChart company={company} />
+          </div>
+        )}
+        {activeTab === 'visuals' && isLoading && (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            Loading data...
+          </div>
+        )}
+        {activeTab === 'visuals' && !isLoading && years.length === 0 && (
+          <div className="h-64 flex items-center justify-center text-gray-500">
+            No data available for {company.toUpperCase()}
+          </div>
+        )}
+        {activeTab === 'pdfs' && (
+          <PDFManagement />
+        )}
+      </div>
   </div>
 );
 };

@@ -320,55 +320,69 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
 
       {/* Content Area */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200">
-        {viewMode === 'chart' ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="p-4 text-left text-gray-600 font-semibold sticky left-0 bg-gray-50">
-                    Education Level
-                  </th>
-                  {chartData.years.map((year) => (
-                    <th key={year} className="p-4 text-center text-gray-600 font-semibold">
-                      {year}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {chartData.labels.map((education, idx) => (
-                  <tr
-                    key={`${education}-${idx}`}
-                    className={`${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
-                  >
-                    <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit">
-                      {education}
-                    </td>
-                    {chartData.years.map((year, yearIdx) => {
-                      const value = chartData.data[year]?.[education] || 0;
-                      return (
-                        <td key={`${year}-${education}-${yearIdx}`} className="p-4">
-                          <div className="flex items-center justify-between gap-2">
-                            <button
-                              ref={triggerButtonRef}
-                              onClick={() => handlePercentageClick(year, education)}
-                              className="text-gray-800 font-medium hover:text-blue-600 transition-colors"
-                            >
-                              {value.toFixed(1)}%
-                            </button>
-                            <div className="flex items-center gap-1">
-                              {getTrend(education, year, yearIdx)}
-                            </div>
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
+      {viewMode === 'chart' ? (
+  <div className="overflow-x-auto p-6">
+    <table className="w-full border-separate border-spacing-0">
+      <thead>
+        <tr>
+          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50 rounded-tl-lg sticky left-0">
+            Education Level
+          </th>
+          {chartData.years.map((year, index) => (
+            <th key={year} className={`px-6 py-4 text-sm font-semibold text-gray-600 bg-gray-50/50 ${
+              index === chartData.years.length - 1 ? 'rounded-tr-lg' : ''
+            }`}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {chartData.labels.map((education, idx) => (
+          <tr key={`${education}-${idx}`}>
+            <td className={`px-6 py-4 font-medium text-gray-700 bg-white sticky left-0 border-b border-gray-100 ${
+              idx === chartData.labels.length - 1 ? 'rounded-bl-lg' : ''
+            }`}>
+              {education}
+            </td>
+            {chartData.years.map((year, yearIdx) => {
+              const value = chartData.data[year]?.[education] || 0;
+              return (
+                <td key={`${year}-${education}-${yearIdx}`} 
+                    className={`px-6 py-4 bg-white border-b border-gray-100 ${
+                      yearIdx === chartData.years.length - 1 && idx === chartData.labels.length - 1 
+                        ? 'rounded-br-lg' 
+                        : ''
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <button
+                      ref={triggerButtonRef}
+                      onClick={() => handlePercentageClick(year, education)}
+                      className="relative group"
+                    >
+                      <span className="text-gray-900 font-semibold hover:text-blue-600 transition-colors">
+                        {value.toFixed(1)}%
+                      </span>
+                      <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span>
+                    </button>
+                    <div className="flex items-center gap-2 min-w-[60px] justify-end">
+                      {getTrend(education, year, yearIdx) && (
+                        <div className="px-2 py-1 rounded-full bg-gray-50">
+                          {getTrend(education, year, yearIdx)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+) : (
           <div className="overflow-x-auto">
             {isDetailedDataLoading ? (
               <div className="flex items-center justify-center h-64">

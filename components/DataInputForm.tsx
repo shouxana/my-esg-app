@@ -1084,7 +1084,7 @@ useEffect(() => {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-gradient-to-r from-blue-100 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center gap-3 mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Social Data Management</h1>
           
@@ -1214,8 +1214,8 @@ useEffect(() => {
 {/* Main Form Grid Container */}
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add Employee Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-green-100 min-h-[800px]">
-          <div className="bg-green-50 p-4 rounded-t-lg border-b border-green-100">
+        <div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
+          <div className="bg-blue-100 p-4 rounded-t-lg border-b border-blue-100">
             <h2 className="text-lg font-semibold text-gray-800">Add New Employee</h2>
             <p className="text-sm text-gray-600">Enter details for new employee records</p>
           </div>

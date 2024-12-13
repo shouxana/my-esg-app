@@ -389,7 +389,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
   return (
     <div className="w-full">
       <div className="sticky top-0 z-50">
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
+        <div className="bg-gradient-to-r from-blue-100 to-blue-50 p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
           <nav className="flex space-x-8 px-4" aria-label="Tabs">
             {Object.entries(tabs).map(([key, tab]) => {
               const Icon = tab.icon;

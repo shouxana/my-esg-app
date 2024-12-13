@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     const sanitizedCompany = company.toLowerCase().replace(/[^a-z0-9]/g, '-');
     // Construct the prefix to include both the section and company
-    const prefix = `${section}/${sanitizedCompany}/`;
+    const prefix = `pdfs/${sanitizedCompany}/${section}/`;
 
     const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_S3_BUCKET_NAME!,

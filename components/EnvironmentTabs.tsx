@@ -107,7 +107,7 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
   
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}`);
+      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}&section=environmental`);
       
       if (!response.ok) {
         const errorData = await response.json();

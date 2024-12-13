@@ -92,7 +92,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
   
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}`);
+      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}&section=social`);
       
       if (!response.ok) {
         const errorData = await response.json();

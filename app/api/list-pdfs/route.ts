@@ -11,18 +11,25 @@ const s3Client = new S3Client({
   },
 });
 
-export const dynamic = 'force-dynamic'; // This makes the route dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // Get company and section from query parameters
     const company = request.nextUrl.searchParams.get('company');
+    const section = request.nextUrl.searchParams.get('section');
 
     if (!company) {
       return NextResponse.json({ error: 'Company parameter required' }, { status: 400 });
     }
 
+    if (!section || !['environmental', 'social', 'governance'].includes(section)) {
+      return NextResponse.json({ error: 'Valid section parameter required' }, { status: 400 });
+    }
+
     const sanitizedCompany = company.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    const prefix = `pdfs/${sanitizedCompany}/`;
+    // Construct the prefix to include both the section and company
+    const prefix = `${section}/${sanitizedCompany}/`;
 
     const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_S3_BUCKET_NAME!,

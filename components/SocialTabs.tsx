@@ -71,7 +71,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
     visuals: {
       label: 'Visuals',
       icon: BarChart2,
-      color: 'text-green-600 border-green-600',
+      color: 'text-blue-600 border-blue-600',
     },
     pdfs: {
       label: 'Uploaded Documents',
@@ -436,9 +436,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
             No data available for {company.toUpperCase()}
           </div>
         )}
-        {activeTab === 'pdfs' && (
-          <PDFManagement />
-        )}
+        
       </div>
   </div>
 );

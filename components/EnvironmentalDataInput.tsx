@@ -387,8 +387,8 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
       {/* Main Form Grid Container */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add Vehicle Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-green-300">
-          <div className="bg-green-50 p-4 rounded-t-lg border-b border-green-300">
+        <div className="bg-white rounded-lg shadow-lg border border-green-100">
+          <div className="bg-green-100 p-4 rounded-t-lg border-b border-green-100">
             <h2 className="text-lg font-semibold text-gray-800">Add New Vehicle</h2>
             <p className="text-sm text-gray-600">Enter details for new vehicle</p>
           </div>
@@ -480,8 +480,8 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
         </div>
 
         {/* Update Vehicle Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-green-100">
-          <div className="bg-blue-50 p-4 rounded-t-lg border-b border-green-100">
+        <div className="bg-white rounded-lg shadow-lg border border-green-50">
+          <div className="bg-green-50 p-4 rounded-t-lg border-b border-green-50">
             <h2 className="text-lg font-semibold text-gray-800">Update Vehicle</h2>
             <p className="text-sm text-gray-600">Modify existing vehicle information</p>
           </div>

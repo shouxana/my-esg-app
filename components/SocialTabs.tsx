@@ -119,6 +119,40 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    const fetchYears = async () => {
+      if (!company) {
+        setError('Company information is required');
+        setIsLoading(false);
+        return;
+      }
+  
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(`/api/gender-distribution?company=${encodeURIComponent(company)}`);
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        if (data.years) {
+          setYears(data.years);
+        }
+      } catch (err) {
+        console.error('Failed to fetch years:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch years');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    if (company) {
+      fetchYears();
+    }
+  }, [company]);
+
   const validateFile = (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
       throw new Error('File size exceeds 10MB limit');

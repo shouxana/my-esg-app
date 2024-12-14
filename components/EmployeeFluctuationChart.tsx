@@ -186,13 +186,44 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
     
       const getTrend = (category: string, year: number, index: number) => {
         if (index === 0) return null;
+        
         const currentValue = chartData.data[year]?.[category] || 0;
         const previousValue = chartData.data[chartData.years[index - 1]]?.[category] || 0;
-        const difference = currentValue - previousValue;
-    
-        if (Math.abs(difference) < 0.1) return <Minus className="h-4 w-4 text-gray-400" />;
-        if (difference > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-        return <TrendingDown className="h-4 w-4 text-red-500" />;
+        
+        // If previous value is 0 and we have a current value
+        if (previousValue === 0) {
+          if (currentValue > 0) {
+            return (
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-xs text-green-600">+100%</span>
+              </div>
+            );
+          }
+          return <Minus className="h-4 w-4 text-gray-400" />;
+        }
+      
+        const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+        
+        if (Math.abs(percentageChange) < 0.1) {
+          return <Minus className="h-4 w-4 text-gray-400" />;
+        }
+        
+        if (percentageChange > 0) {
+          return (
+            <div className="flex items-center gap-1">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span className="text-xs text-green-600">+{percentageChange.toFixed(1)}%</span>
+            </div>
+          );
+        }
+        
+        return (
+          <div className="flex items-center gap-1">
+            <TrendingDown className="h-4 w-4 text-red-500" />
+            <span className="text-xs text-red-600">{percentageChange.toFixed(1)}%</span>
+          </div>
+        );
       };
     
       const handleExport = async () => {
@@ -289,113 +320,129 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
     
           {/* Content Area */}
           <div className="bg-white rounded-lg shadow-lg border border-gray-200">
-            {viewMode === 'chart' ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="p-4 text-left text-gray-600 font-semibold sticky left-0 bg-gray-50">
-                        Age Group
+          {viewMode === 'chart' ? (
+            <div className="overflow-x-auto p-6">
+              <table className="w-full border-separate border-spacing-0">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50 rounded-tl-lg sticky left-0">
+                      Age Group
+                    </th>
+                    {chartData.years.map((year, index) => (
+                      <th key={year} className={`relative px-6 py-4 text-sm font-semibold text-gray-600 bg-gray-50/50 ${
+                        index === chartData.years.length - 1 ? 'rounded-tr-lg' : ''
+                      }`}>
+                        <div className="relative z-10">{year}</div>
+                        <div className="absolute inset-0 bg-blue-50/20" />
                       </th>
-                      {chartData.years.map((year) => (
-                        <th key={year} className="p-4 text-center text-gray-600 font-semibold">
-                          {year}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {chartData.categories.map((category, idx) => (
-                      <tr
-                        key={category}
-                        className={`${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
-                      >
-                        <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit">
-                          {category}
-                        </td>
-                        {chartData.years.map((year, yearIdx) => {
-                          const value = chartData.data[year]?.[category] || 0;
-                          return (
-                            <td key={`${year}-${category}`} className="p-4">
-                              <div className="flex items-center justify-between gap-2">
-                                <button
-                                  onClick={() => handlePercentageClick(year, category)}
-                                  className="text-gray-800 font-medium hover:text-blue-600 transition-colors"
-                                >
-                                  {value.toFixed(1)}%
-                                </button>
-                                <div className="flex items-center gap-1">
-                                  {getTrend(category, year, yearIdx)}
-                                </div>
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                {isDetailedLoading ? (
-                  <div className="flex items-center justify-center h-64">
-                    <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-                  </div>
-                ) : (
-                  <table className="w-full">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
-                          Employee
-                        </th>
-                        <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                          Employment Date
-                        </th>
-                        <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                          Status
-                        </th>
-                        {chartData.years.map(year => (
-                          <th key={year} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
-                            {year}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {detailedData.map((employee) => (
-                        <tr 
-                          key={employee.employee_id}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-4 py-2">
-                            <div className="font-medium text-gray-900">
-                              ID {employee.employee_id}: {employee.full_name}
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartData.categories.map((category, idx) => (
+                    <tr key={`${category}-${idx}`}>
+                      <td className={`px-6 py-4 font-medium text-gray-700 bg-white sticky left-0 border-b border-gray-100 ${
+                        idx === chartData.categories.length - 1 ? 'rounded-bl-lg' : ''
+                      }`}>
+                        {category}
+                      </td>
+                      {chartData.years.map((year, yearIdx) => {
+                        const value = chartData.data[year]?.[category] || 0;
+                        return (
+                          <td key={`${year}-${category}-${yearIdx}`} 
+                              className={`relative px-6 py-4 bg-white border-b border-gray-100 ${
+                                yearIdx === chartData.years.length - 1 && idx === chartData.categories.length - 1 
+                                  ? 'rounded-br-lg' 
+                                  : ''
+                              }`}
+                          >
+                            <div className="absolute inset-0 bg-blue-50/20" />
+                            <div className="relative z-10 flex items-center justify-between">
+                              <button
+                                ref={triggerButtonRef}
+                                onClick={() => handlePercentageClick(year, category)}
+                                className="relative group"
+                              >
+                                <span className="text-gray-900 font-semibold hover:text-blue-600 transition-colors">
+                                  {value.toFixed(1)}%
+                                </span>
+                                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span>
+                              </button>
+                              <div className="flex items-center gap-2 min-w-[80px] justify-end">
+                                {getTrend(category, year, yearIdx) && (
+                                  <div className="px-2 py-1 rounded-full bg-gray-50">
+                                    {getTrend(category, year, yearIdx)}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-center text-gray-600">
-                            {employee.employment_date}
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="overflow-x-auto p-6">
+              <table className="w-full border-separate border-spacing-0">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50 rounded-tl-lg sticky left-0">
+                      Age Group
+                    </th>
+                    {chartData.years.map((year, index) => (
+                      <th key={year} className={`relative px-6 py-4 text-sm font-semibold text-gray-600 bg-gray-50/50 ${
+                        index === chartData.years.length - 1 ? 'rounded-tr-lg' : ''
+                      }`}>
+                        <div className="relative z-10">{year}</div>
+                        <div className="absolute inset-0 bg-blue-50/20" />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartData.categories.map((category, idx) => (
+                    <tr key={category}>
+                      <td className={`px-6 py-4 font-medium text-gray-700 bg-white sticky left-0 border-b border-gray-100 ${
+                        idx === chartData.categories.length - 1 ? 'rounded-bl-lg' : ''
+                      }`}>
+                        {category}
+                      </td>
+                      {chartData.years.map((year, yearIdx) => {
+                        const value = chartData.data[year]?.[category] || 0;
+                        return (
+                          <td key={`${year}-${category}`} className={`relative px-6 py-4 bg-white border-b border-gray-100 ${
+                            yearIdx === chartData.years.length - 1 && idx === chartData.categories.length - 1 
+                              ? 'rounded-br-lg' 
+                              : ''
+                          }`}>
+                            <div className="absolute inset-0 bg-blue-50/20" />
+                            <div className="relative z-10 flex items-center justify-between">
+                              <button
+                                onClick={() => handlePercentageClick(year, category)}
+                                className="relative group text-gray-800 font-medium hover:text-blue-600 transition-colors"
+                              >
+                                <span>{value.toFixed(1)}%</span>
+                                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span>
+                              </button>
+                              <div className="flex items-center gap-2 min-w-[80px] justify-end">
+                                {getTrend(category, year, yearIdx) && (
+                                  <div className="px-2 py-1 rounded-full bg-gray-50">
+                                    {getTrend(category, year, yearIdx)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </td>
-                          <td className="px-4 py-2 text-center">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              employee.status === 'Active' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {employee.status}
-                            </span>
-                          </td>
-                          {['2021', '2022', '2023', '2024'].map((year) => (
-                            <td key={year} className="px-4 py-2 text-center text-gray-600">
-                              {employee[`age_group_${year}`]}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             )}
           </div>
     

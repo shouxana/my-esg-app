@@ -5,6 +5,8 @@ import { FormInput, BarChart2, FileText, Upload, X, Trash2, RefreshCw } from 'lu
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { useSearchParams, useRouter } from 'next/navigation';
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 import DataInputForm from './DataInputForm';
 import EducationChart from './EducationChart';
 import GenderDistributionChart from './GenderDistributionChart';
@@ -34,10 +36,6 @@ interface TabType {
   color: string;
 }
 
-interface SocialTabsProps {
-  company?: string;
-}
-
 interface PDFFile {
   id: string;
   name: string;
@@ -46,9 +44,15 @@ interface PDFFile {
   url: string;
 }
 
+interface SocialTabsProps {
+  company?: string;
+  searchParams: ReadonlyURLSearchParams;
+  router: ReturnType<typeof useRouter>;
+}
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
+const SocialTabs: React.FC<SocialTabsProps> = ({ company, searchParams, router }) => {
   const [activeTab, setActiveTab] = useState<'input' | 'visuals' | 'pdfs'>('input');
   const [years, setYears] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,6 +157,28 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
     }
   }, [company]);
 
+// Add useEffect to handle URL changes
+useEffect(() => {
+  const tabFromUrl = searchParams.get('tab');
+  if (tabFromUrl === 'input' || tabFromUrl === 'visuals' || tabFromUrl === 'pdfs') {
+    setActiveTab(tabFromUrl);
+  }
+}, [searchParams]);
+
+// Fix the handleTabChange function
+const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
+  setActiveTab(tab);
+  
+  // Update URL while preserving other parameters
+  const params = new URLSearchParams(window.location.search);
+  params.set('tab', tab);
+  // Preserve the view parameter if it exists
+  const currentView = searchParams.get('view');
+  if (currentView) {
+    params.set('view', currentView);
+  }
+  router.push(`${window.location.pathname}?${params.toString()}`);
+};
   const validateFile = (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
       throw new Error('File size exceeds 10MB limit');
@@ -430,7 +456,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
               return (
                 <button
                   key={key}
-                  onClick={() => setActiveTab(key as typeof activeTab)}
+                  onClick={() => handleTabChange(key as typeof activeTab)}
                   className={`
                     group inline-flex items-center py-3 px-4 rounded-md font-medium text-sm transition-colors
                     ${activeTab === key
@@ -447,25 +473,25 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company }) => {
         </div>
       </div>
 
-       {/* Tab Content */}
-<div className="mt-4">
-  {activeTab === 'input' && company && (
-    <DataInputForm company={company} />
-  )}
-  {activeTab === 'visuals' && (
-    <div className="space-y-6">
-      <EducationChart company={company} />
-      <GenderDistributionChart years={years} company={company} />
-      <EmployeeFluctuationChart company={company} />
-      <LeaveTrackingChart company={company} />
+      {/* Tab Content */}
+      <div className="mt-4">
+        {activeTab === 'input' && company && (
+          <DataInputForm company={company} />
+        )}
+        {activeTab === 'visuals' && (
+          <div className="space-y-6">
+            <EducationChart company={company} />
+            <GenderDistributionChart years={years} company={company} />
+            <EmployeeFluctuationChart company={company} />
+            <LeaveTrackingChart company={company} />
+          </div>
+        )}
+        {activeTab === 'pdfs' && (
+          <PDFManagement />
+        )}
+      </div>
     </div>
-  )}
-  {activeTab === 'pdfs' && (
-    <PDFManagement />
-  )}
-</div>
-  </div>
-);
+  );
 };
 
 export default SocialTabs;

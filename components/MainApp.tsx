@@ -220,7 +220,11 @@ const MainApp = ({ initialView }: MainAppProps) => {
       <div className="flex-1 overflow-auto">
         <div className="p-8">
         {currentView === 'social' && (
-          <SocialTabs company={userData?.company} />
+          <SocialTabs 
+            company={userData?.company} 
+            searchParams={searchParams}
+            router={router}
+          />
         )}
         {currentView === 'environmental' && (
           <EnvironmentTabs 

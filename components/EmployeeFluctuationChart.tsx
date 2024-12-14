@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Download, Table, Loader2, TrendingUp, TrendingDown, Minus, X } from 'lucide-react';
+import { exportFluctuationData, exportDetailedFluctuationData } from './excel-export-utils';
+
+
 
 interface FluctuationData {
   [year: number]: {
@@ -227,7 +230,26 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
       };
     
       const handleExport = async () => {
-        // Implement export functionality
+        try {
+          if (viewMode === 'chart') {
+            const exportData = {
+              categories: chartData.categories,
+              years: chartData.years,
+              data: chartData.data,
+              company: company
+            };
+            await exportFluctuationData(exportData);
+          } else {
+            // If in detailed view and data hasn't been loaded yet
+            if (!detailedData || detailedData.length === 0) {
+              await fetchDetailedData();
+            }
+            await exportDetailedFluctuationData(detailedData);
+          }
+        } catch (error) {
+          console.error('Export failed:', error);
+          setError('Failed to export data');
+        }
       };
 
 
@@ -385,66 +407,67 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
               </table>
             </div>
           ) : (
-            <div className="overflow-x-auto p-6">
-              <table className="w-full border-separate border-spacing-0">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50 rounded-tl-lg sticky left-0">
-                      Age Group
-                    </th>
-                    {chartData.years.map((year, index) => (
-                      <th key={year} className={`relative px-6 py-4 text-sm font-semibold text-gray-600 bg-gray-50/50 ${
-                        index === chartData.years.length - 1 ? 'rounded-tr-lg' : ''
-                      }`}>
-                        <div className="relative z-10">{year}</div>
-                        <div className="absolute inset-0 bg-blue-50/20" />
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {chartData.categories.map((category, idx) => (
-                    <tr key={category}>
-                      <td className={`px-6 py-4 font-medium text-gray-700 bg-white sticky left-0 border-b border-gray-100 ${
-                        idx === chartData.categories.length - 1 ? 'rounded-bl-lg' : ''
-                      }`}>
-                        {category}
-                      </td>
-                      {chartData.years.map((year, yearIdx) => {
-                        const value = chartData.data[year]?.[category] || 0;
-                        return (
-                          <td key={`${year}-${category}`} className={`relative px-6 py-4 bg-white border-b border-gray-100 ${
-                            yearIdx === chartData.years.length - 1 && idx === chartData.categories.length - 1 
-                              ? 'rounded-br-lg' 
-                              : ''
-                          }`}>
-                            <div className="absolute inset-0 bg-blue-50/20" />
-                            <div className="relative z-10 flex items-center justify-between">
-                              <button
-                                onClick={() => handlePercentageClick(year, category)}
-                                className="relative group text-gray-800 font-medium hover:text-blue-600 transition-colors"
-                              >
-                                <span>{value.toFixed(1)}%</span>
-                                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span>
-                              </button>
-                              <div className="flex items-center gap-2 min-w-[80px] justify-end">
-                                {getTrend(category, year, yearIdx) && (
-                                  <div className="px-2 py-1 rounded-full bg-gray-50">
-                                    {getTrend(category, year, yearIdx)}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            )}
-          </div>
+             // New detailed view
+    <div className="overflow-x-auto p-6">
+    {isDetailedLoading ? (
+      <div className="w-full h-64 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    ) : (
+      <table className="w-full border-separate border-spacing-0">
+        <thead>
+          <tr>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50 rounded-tl-lg">
+              Employee ID
+            </th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
+              Full Name
+            </th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
+              Employment Date
+            </th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
+              Termination Date
+            </th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
+              Status
+            </th>
+            {chartData.years.map((year) => (
+              <th key={year} className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
+                Age Group {year}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {detailedData.map((employee, idx) => (
+            <tr key={employee.employee_id}>
+              <td className="px-6 py-4 text-gray-900">{employee.employee_id}</td>
+              <td className="px-6 py-4 text-gray-900">{employee.full_name}</td>
+              <td className="px-6 py-4 text-gray-900">{employee.employment_date}</td>
+              <td className="px-6 py-4 text-gray-900">{employee.termination_date || '-'}</td>
+              <td className="px-6 py-4">
+                <span className={`px-2 py-1 rounded-full text-sm ${
+                  employee.status === 'Active' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {employee.status}
+                </span>
+              </td>
+              {chartData.years.map((year) => (
+                <td key={year} className="px-6 py-4 text-gray-900">
+                  {employee[`age_group_${year}`]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+</div>
     
           {/* Enhanced Modal */}
           {isPopupOpen && (

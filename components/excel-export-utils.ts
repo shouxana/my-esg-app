@@ -330,3 +330,80 @@ export const exportDetailedGenderData = async (data: DetailedEmployeeData[]) => 
 
   downloadExcel(wb, 'detailed_gender_data.xlsx');
 };
+
+export const exportFluctuationData = async (data: ChartData) => {
+  const wb = utils.book_new();
+
+  const wsData = [
+    ['Employee Fluctuation Data'],
+    [],
+    ['Age Group', ...data.years.map((year) => year.toString())],
+  ];
+
+  data.categories.forEach((category) => {
+    const row = [category];
+    data.years.forEach((year) => {
+      row.push(`${data.data[year]?.[category]?.toFixed(1)}%` || '0%');
+    });
+    wsData.push(row);
+  });
+
+  const ws = utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{ width: 20 }, ...data.years.map(() => ({ width: 15 }))];
+
+  utils.book_append_sheet(wb, ws, 'Fluctuation Data');
+
+  downloadExcel(wb, 'employee_fluctuation_data.xlsx');
+};
+
+export const exportDetailedFluctuationData = async (data: DetailedFluctuationData[]) => {
+  const wb = utils.book_new();
+
+  const wsData = [
+    ['Detailed Employee Fluctuation Data'],
+    [],
+    [
+      'Employee ID',
+      'Full Name',
+      'Employment Date',
+      'Termination Date',
+      'Status',
+      'Age Group 2021',
+      'Age Group 2022',
+      'Age Group 2023',
+      'Age Group 2024',
+    ],
+  ];
+
+  data.forEach((employee) => {
+    wsData.push([
+      employee.employee_id.toString(),
+      employee.full_name,
+      employee.employment_date,
+      employee.termination_date || '',
+      employee.status,
+      employee.age_group_2021 || '',
+      employee.age_group_2022 || '',
+      employee.age_group_2023 || '',
+      employee.age_group_2024 || '',
+    ]);
+  });
+
+  const ws = utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [
+    { width: 15 },
+    { width: 25 },
+    { width: 15 },
+    { width: 15 },
+    { width: 10 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+  ];
+
+  utils.book_append_sheet(wb, ws, 'Detailed Data');
+
+  downloadExcel(wb, 'detailed_employee_fluctuation_data.xlsx');
+};
+

@@ -30,12 +30,15 @@ export default function SocialPage() {
           if (!searchParams.get('tab')) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', 'input');
-            // Preserve any existing params
-            for (const [key, value] of searchParams.entries()) {
+            
+            // Convert entries() to array before iterating
+            const entries = Array.from(searchParams.entries());
+            for (const [key, value] of entries) {
               if (key !== 'tab') {
                 params.set(key, value);
               }
             }
+            
             router.push(`${window.location.pathname}?${params.toString()}`);
           }
         } else {

@@ -206,11 +206,41 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
     if (index === 0) return null;
     const currentValue = chartData.data[year]?.[education] || 0;
     const previousValue = chartData.data[chartData.years[index - 1]]?.[education] || 0;
-    const difference = currentValue - previousValue;
-
-    if (Math.abs(difference) < 0.1) return <Minus className="h-4 w-4 text-gray-400" />;
-    if (difference > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    return <TrendingDown className="h-4 w-4 text-red-500" />;
+    
+    // If previous value is 0 and we have a current value
+    if (previousValue === 0) {
+      if (currentValue > 0) {
+        return (
+          <div className="flex items-center gap-1">
+            <TrendingUp className="h-4 w-4 text-green-500" />
+            <span className="text-xs text-green-600">+100%</span>
+          </div>
+        );
+      }
+      return <Minus className="h-4 w-4 text-gray-400" />;
+    }
+  
+    const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+    
+    if (Math.abs(percentageChange) < 0.1) {
+      return <Minus className="h-4 w-4 text-gray-400" />;
+    }
+    
+    if (percentageChange > 0) {
+      return (
+        <div className="flex items-center gap-1">
+          <TrendingUp className="h-4 w-4 text-green-500" />
+          <span className="text-xs text-green-600">+{percentageChange.toFixed(1)}%</span>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex items-center gap-1">
+        <TrendingDown className="h-4 w-4 text-red-500" />
+        <span className="text-xs text-red-600">{percentageChange.toFixed(1)}%</span>
+      </div>
+    );
   };
 
   const handleExport = async () => {
@@ -250,77 +280,88 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
 
   return (
     <div className="space-y-8">
-      {/* Header Section - Updated to match Gender Distribution layout */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              Employee Education
-          <div className="relative group">
-            <svg 
-              viewBox="0 0 100 100" 
-              className="h-[1em] w-[1em] cursor-help" 
-              role="img"
-              aria-label="SDG Goal 4 - Quality Education"
-            >
-              <rect width="100" height="100" fill="#C5192D"/>
-              <path 
-                d="M50 20L25 35v30l25 15 25-15V35L50 20zm0 8l17 10v14L50 62 33 52V38l17-10z" 
-                fill="white"
-              />
-              <path 
-                d="M50 44c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm0-12c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" 
-                fill="white"
-              />
-            </svg>
-            <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full top-0 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
-              SDG Goal 4 - Quality Education
-            </div>
-          </div>
+      {/* Header Section */}
+<div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl shadow-sm border border-gray-200">
+  <div className="flex items-center justify-between">
+    <div className="space-y-1">
+      <div className="flex items-center gap-3">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Employee Education
         </h2>
+        <div className="relative group">
+          <svg 
+            viewBox="0 0 100 100" 
+            className="h-6 w-6 cursor-help text-red-600" 
+            role="img"
+            aria-label="SDG Goal 4 - Quality Education"
+          >
+            <rect width="100" height="100" fill="currentColor"/>
+            <path 
+              d="M50 20L25 35v30l25 15 25-15V35L50 20zm0 8l17 10v14L50 62 33 52V38l17-10z" 
+              fill="white"
+            />
+            <path 
+              d="M50 44c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm0-12c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" 
+              fill="white"
+            />
+          </svg>
+          <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full top-0 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-lg border border-gray-200 whitespace-nowrap z-50">
+            SDG Goal 4 - Quality Education
+          </div>
         </div>
-        <button
-          onClick={handleExport}
-          className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
-        >
-          <Download className="h-4 w-4" />
-          Export Excel
-        </button>
       </div>
+      <p className="text-sm text-gray-500">Track education levels across your organization</p>
+    </div>
+    
+    <div className="flex items-center gap-5">  {/* Increased gap between toggle and export */}
+  {/* Toggle Buttons Group */}
+  <div className="bg-white border border-gray-200 p-0.5 rounded-lg flex shadow-sm">
+    <button
+      onClick={() => setViewMode('chart')}
+      className={`
+        relative px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 
+        ${viewMode === 'chart' 
+          ? 'bg-blue-500 text-white shadow-md transform scale-[1.02]' 
+          : 'bg-white text-gray-600 hover:bg-gray-50'
+        }
+      `}
+    >
+      Report View
+    </button>
+    <button
+      onClick={() => {
+        setViewMode('data');
+        if (viewMode !== 'data') fetchDetailedData();
+      }}
+      className={`
+        relative flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200
+        ${viewMode === 'data' 
+          ? 'bg-blue-500 text-white shadow-md transform scale-[1.02]' 
+          : 'bg-white text-gray-600 hover:bg-gray-50'
+        }
+      `}
+    >
+      <Table className="h-4 w-4" />
+      Detailed View
+    </button>
+  </div>
 
-      <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
-          <button
-            className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
-              viewMode === 'chart' 
-                ? 'bg-white text-gray-800 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-            onClick={() => setViewMode('chart')}
-          >
-            Report View
-          </button>
-          <button
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
-              viewMode === 'data' 
-                ? 'bg-white text-gray-800 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-            onClick={() => {
-              setViewMode('data');
-              if (viewMode !== 'data') {
-                fetchDetailedData();
-              }
-            }}
-          >
-            <Table className="h-4 w-4" />
-            Detailed View
-          </button>
-        </div>
-      </div>
+  {/* Export Button */}
+  <button
+    onClick={handleExport}
+    className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 
+    text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+  >
+    <Download className="h-4 w-4" />
+    Export
+  </button>
+</div>
+  </div>
+</div>
 
       {/* Content Area */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200">
-      {viewMode === 'chart' ? (
+        {viewMode === 'chart' ? (
   <div className="overflow-x-auto p-6">
     <table className="w-full border-separate border-spacing-0">
       <thead>
@@ -366,7 +407,7 @@ const EducationChart: React.FC<EducationChartProps> = ({ company }) => {
                       </span>
                       <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span>
                     </button>
-                    <div className="flex items-center gap-2 min-w-[60px] justify-end">
+                    <div className="flex items-center gap-2 min-w-[80px] justify-end">
                       {getTrend(education, year, yearIdx) && (
                         <div className="px-2 py-1 rounded-full bg-gray-50">
                           {getTrend(education, year, yearIdx)}

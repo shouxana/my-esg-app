@@ -219,62 +219,71 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
       return (
         <div className="space-y-6">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-2xl font-bold text-gray-800">Employee Fluctuation</h2>
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Employee Fluctuation
+                  </h2>
                   <div className="relative group">
-                    <div className="bg-purple-600 rounded p-1">
-                      <svg 
-                        viewBox="0 0 100 100" 
-                        className="h-[1em] w-[1em] cursor-help" 
-                        role="img"
-                        aria-label="SDG Goal 8 - Decent Work and Economic Growth"
-                      >
-                        <rect width="100" height="100" fill="#A21942"/>
-                        <path d="M25 65h50v8H25zm0-15h50v8H25zm0-15h50v8H25z" fill="white"/>
-                      </svg>
-                    </div>
-                    <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full -top-2 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-md border border-gray-200 whitespace-nowrap z-50">
+                    <svg 
+                      viewBox="0 0 100 100" 
+                      className="h-6 w-6 cursor-help text-purple-600" 
+                      role="img"
+                      aria-label="SDG Goal 8 - Decent Work and Economic Growth"
+                    >
+                      <rect width="100" height="100" fill="currentColor"/>
+                      <path d="M25 65h50v8H25zm0-15h50v8H25zm0-15h50v8H25z" fill="white"/>
+                    </svg>
+                    <div className="absolute hidden group-hover:block left-1/2 transform -translate-x-1/2 -translate-y-full top-0 px-2 py-1 bg-white text-gray-700 text-sm rounded shadow-lg border border-gray-200 whitespace-nowrap z-50">
                       SDG Goal 8 - Decent Work and Economic Growth
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600">Company: {company.toUpperCase()}</p>
+                <p className="text-sm text-gray-500">Track employee age distribution changes over time</p>
               </div>
-              <button
-                onClick={handleExport}
-                className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
-              >
-                <Download className="h-4 w-4" />
-                Export Excel
-              </button>
-            </div>
-    
-            {/* Modern Toggle Buttons */}
-            <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
-              <button
-                className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
-                  viewMode === 'chart' 
-                    ? 'bg-white text-gray-800 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-                onClick={() => setViewMode('chart')}
-              >
-                Report View
-              </button>
-              <button
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
-                  viewMode === 'data' 
-                    ? 'bg-white text-gray-800 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-                onClick={() => setViewMode('data')}
-              >
-                <Table className="h-4 w-4" />
-                Detailed View
-              </button>
+              
+              <div className="flex items-center gap-5">
+                {/* Toggle Buttons Group */}
+                <div className="bg-white border border-gray-200 p-0.5 rounded-lg flex shadow-sm">
+                  <button
+                    onClick={() => setViewMode('chart')}
+                    className={`
+                      relative px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 
+                      ${viewMode === 'chart' 
+                        ? 'bg-blue-500 text-white shadow-md transform scale-[1.02]' 
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }
+                    `}
+                  >
+                    Report View
+                  </button>
+                  <button
+                    onClick={() => setViewMode('data')}
+                    className={`
+                      relative flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200
+                      ${viewMode === 'data' 
+                        ? 'bg-blue-500 text-white shadow-md transform scale-[1.02]' 
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }
+                    `}
+                  >
+                    <Table className="h-4 w-4" />
+                    Detailed View
+                  </button>
+                </div>
+
+                {/* Export Button */}
+                <button
+                  onClick={handleExport}
+                  className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 
+                  text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+                >
+                  <Download className="h-4 w-4" />
+                  Export
+                </button>
+              </div>
             </div>
           </div>
     

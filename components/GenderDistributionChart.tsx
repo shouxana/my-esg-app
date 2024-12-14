@@ -230,68 +230,85 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            Gender Distribution
-            <svg 
-              viewBox="0 0 100 100" 
-              className="h-[1em] w-[1em] cursor-help" 
-              role="img"
-              aria-label="SDG Goal 5 - Gender Equality"
-            >
-              <rect width="100" height="100" fill="#FF3A21"/>
-              <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
-              <rect x="46" y="59" width="8" height="14" fill="white"/>
-              <rect x="38" y="67" width="24" height="8" fill="white"/>
-            </svg>
-            <svg 
-              viewBox="0 0 100 100" 
-              className="h-[1em] w-[1em] cursor-help"
-              role="img"
-              aria-label="SDG Goal 10 - Reduced Inequalities"
-            >
-              <rect width="100" height="100" fill="#DD1367"/>
-              <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
-            </svg>
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl shadow-sm border border-gray-200">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Gender Distribution
           </h2>
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <svg 
+                viewBox="0 0 100 100" 
+                className="h-6 w-6 cursor-help text-red-500" 
+                role="img"
+                aria-label="SDG Goal 5 - Gender Equality"
+              >
+                <rect width="100" height="100" fill="currentColor"/>
+                <path d="M50 27c-8.8 0-16 7.2-16 16s7.2 16 16 16 16-7.2 16-16-7.2-16-16-16zm0 24c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
+                <rect x="46" y="59" width="8" height="14" fill="white"/>
+                <rect x="38" y="67" width="24" height="8" fill="white"/>
+              </svg>
+            </div>
+            <div className="relative group">
+              <svg 
+                viewBox="0 0 100 100" 
+                className="h-6 w-6 cursor-help text-pink-500"
+                role="img"
+                aria-label="SDG Goal 10 - Reduced Inequalities"
+              >
+                <rect width="100" height="100" fill="currentColor"/>
+                <path d="M30 50h40v6H30v-6zm0-12h40v6H30v-6zm0 24h40v6H30v-6z" fill="white"/>
+              </svg>
+            </div>
+          </div>
         </div>
-          <button
-            onClick={handleExport}
-            className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
-          >
-            <Download className="h-4 w-4" />
-            Export Excel
-          </button>
-        </div>
+        <p className="text-sm text-gray-500">Track gender distribution and equality metrics</p>
+      </div>
 
-        {/* Modern Toggle Buttons */}
-        <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
+      <div className="flex items-center gap-5">
+        {/* Toggle Buttons Group */}
+        <div className="bg-white border border-gray-200 p-0.5 rounded-lg flex shadow-sm">
           <button
-            className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
-              viewMode === 'chart' 
-                ? 'bg-white text-gray-800 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
             onClick={() => setViewMode('chart')}
+            className={`
+              relative px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 
+              ${viewMode === 'chart' 
+                ? 'bg-blue-500 text-white shadow-md transform scale-[1.02]' 
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+              }
+            `}
           >
             Report View
           </button>
           <button
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
-              viewMode === 'data' 
-                ? 'bg-white text-gray-800 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
             onClick={() => setViewMode('data')}
+            className={`
+              relative flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200
+              ${viewMode === 'data' 
+                ? 'bg-blue-500 text-white shadow-md transform scale-[1.02]' 
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+              }
+            `}
           >
             <Table className="h-4 w-4" />
             Detailed View
           </button>
         </div>
+
+        {/* Export Button */}
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 
+          text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+        >
+          <Download className="h-4 w-4" />
+          Export
+        </button>
       </div>
+    </div>
+    </div>
 
       {/* Content Area */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8">

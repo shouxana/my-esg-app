@@ -331,6 +331,33 @@ export const exportDetailedGenderData = async (data: DetailedEmployeeData[]) => 
   downloadExcel(wb, 'detailed_gender_data.xlsx');
 };
 
+
+interface FluctuationData {
+  [year: number]: {
+    [category: string]: number;
+  };
+}
+
+interface ChartData {
+  categories: string[];
+  years: number[];
+  data: FluctuationData;
+  company?: string;
+}
+
+interface DetailedFluctuationData {
+  employee_id: number;
+  full_name: string;
+  employment_date: string;
+  termination_date: string | null;
+  status: string;
+  age_group_2021: string;
+  age_group_2022: string;
+  age_group_2023: string;
+  age_group_2024: string;
+  company: string;
+}
+
 export const exportFluctuationData = async (data: ChartData) => {
   const wb = utils.book_new();
 

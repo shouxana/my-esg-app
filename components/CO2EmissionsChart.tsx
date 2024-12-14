@@ -31,11 +31,11 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
     );
 
     const COLORS = {
-      Diesel: '#0088FE',
-      Petrol: '#00C49F',
-      Hybrid: '#FFBB28',
-      Electric: '#FF8042',
-      LNG: '#8884d8'
+      Diesel: '#1f77b4',    // Deep blue
+      Petrol: '#2ca02c',    // Green
+      Hybrid: '#ff7f0e',    // Orange
+      Electric: '#9467bd',  // Purple
+      LNG: '#d62728'       // Red
     };
 
     useEffect(() => {
@@ -143,7 +143,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
                             key={type} 
                             dataKey={type}
                             fill={COLORS[type]}
-                            opacity={0.3}
+                            opacity={0.25}
                             />
                         ))}
                     </BarChart>

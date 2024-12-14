@@ -408,65 +408,74 @@ const EmployeeFluctuationChart: React.FC<EmployeeFluctuationChartProps> = ({ com
             </div>
           ) : (
              // New detailed view
-    <div className="overflow-x-auto p-6">
-    {isDetailedLoading ? (
-      <div className="w-full h-64 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    ) : (
-      <table className="w-full border-separate border-spacing-0">
-        <thead>
-          <tr>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50 rounded-tl-lg">
-              Employee ID
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
-              Full Name
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
-              Employment Date
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
-              Termination Date
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
-              Status
-            </th>
-            {chartData.years.map((year) => (
-              <th key={year} className="px-6 py-4 text-left text-sm font-semibold text-gray-600 bg-gray-50/50">
-                Age Group {year}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {detailedData.map((employee, idx) => (
-            <tr key={employee.employee_id}>
-              <td className="px-6 py-4 text-gray-900">{employee.employee_id}</td>
-              <td className="px-6 py-4 text-gray-900">{employee.full_name}</td>
-              <td className="px-6 py-4 text-gray-900">{employee.employment_date}</td>
-              <td className="px-6 py-4 text-gray-900">{employee.termination_date || '-'}</td>
-              <td className="px-6 py-4">
-                <span className={`px-2 py-1 rounded-full text-sm ${
-                  employee.status === 'Active' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {employee.status}
-                </span>
-              </td>
-              {chartData.years.map((year) => (
-                <td key={year} className="px-6 py-4 text-gray-900">
-                  {employee[`age_group_${year}`]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )}
-  </div>
-)}
+             <div className="overflow-x-auto">
+             {isDetailedLoading ? (
+               <div className="flex items-center justify-center h-64">
+                 <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+               </div>
+             ) : (
+               <table className="w-full">
+                 <thead className="bg-gray-50 sticky top-0">
+                   <tr>
+                     <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                       Employee
+                     </th>
+                     <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                       Employment Date
+                     </th>
+                     <th className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                       Status
+                     </th>
+                     {chartData.years.map(year => (
+                       <th key={year} className="px-4 py-3 text-center text-sm font-semibold text-gray-600">
+                         {year}
+                       </th>
+                     ))}
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-200">
+                   {detailedData.map((employee) => {
+                     const hasChanges = [
+                       employee.age_group_2021,
+                       employee.age_group_2022,
+                       employee.age_group_2023,
+                       employee.age_group_2024,
+                     ].some((value, index, array) => 
+                       index > 0 && value !== array[index - 1]
+                     );
+         
+                     return (
+                       <tr 
+                         key={employee.employee_id}
+                         className={`hover:bg-gray-50 ${hasChanges ? 'bg-yellow-50' : ''}`}
+                       >
+                         <td className="px-4 py-2">
+                           ID {employee.employee_id}: {employee.full_name}
+                         </td>
+                         <td className="px-4 py-2 text-center text-gray-600">
+                           {employee.employment_date}
+                         </td>
+                         <td className="px-4 py-2 text-center">
+                           <span className={`px-2 py-1 rounded-full text-xs ${
+                             employee.status === 'Active' 
+                               ? 'bg-green-100 text-green-800' 
+                               : 'bg-gray-100 text-gray-800'
+                           }`}>
+                             {employee.status}
+                           </span>
+                         </td>
+                         <td className="px-4 py-2 text-center">{employee.age_group_2021}</td>
+                         <td className="px-4 py-2 text-center">{employee.age_group_2022}</td>
+                         <td className="px-4 py-2 text-center">{employee.age_group_2023}</td>
+                         <td className="px-4 py-2 text-center">{employee.age_group_2024}</td>
+                       </tr>
+                     );
+                   })}
+                 </tbody>
+               </table>
+             )}
+           </div>
+         )}
 </div>
     
           {/* Enhanced Modal */}

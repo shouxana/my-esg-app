@@ -134,6 +134,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
     
     const routes = routeData[selectedYear]?.[vehicleType] || [];
     setSelectedRouteData(routes.length > 0 ? routes : null);
+    setActiveType(vehicleType);
     setIsPopupOpen(true);
   };
 
@@ -386,29 +387,32 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
 
       {/* Route Details Dialog */}
       {isPopupOpen && selectedRouteData && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={() => setIsPopupOpen(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    Route Details - {selectedYear}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setIsPopupOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="h-5 w-5 text-gray-500" />
-                </button>
-              </div>
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      onClick={() => setIsPopupOpen(false)}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Route Details - {selectedYear}
+              </h2>
+              <p className="text-sm text-gray-500" style={{ color: COLORS[activeType || ''] }}>
+                {activeType} Vehicles
+              </p>
+            </div>
+            <button
+              onClick={() => setIsPopupOpen(false)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
 
               {/* Table Container */}
               <div className="max-h-[60vh] overflow-y-auto">

@@ -344,260 +344,264 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
         </p>
       </div>
 
-      {/* Quick Actions Bar */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex gap-4">
-            <label className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition-colors">
-                <Upload className="h-4 w-4" />
-                <span>Bulk Import</span>
-                <input
-                type="file"
-                accept=".xlsx,.xls"
-                className="hidden"
-                onChange={handleExcelImport}
-                />
-            </label>
-
-            <button
-                type="button"
-                onClick={downloadExcelTemplate}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
-            >
-                <Download className="h-4 w-4" />
-                Download Template
-            </button>
-
-            <button
-                type="button"
-                onClick={() => {
-                if (!selectedVehicle) {
-                    alert('Please select a vehicle first');
-                    return;
-                }
-                setIsChangeLogOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
-            >
-                <History className="h-4 w-4" />
-                View Change Log
-            </button>
-            </div>
-        </div>
-
+      
       {/* Main Form Grid Container */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add Vehicle Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-green-100">
-          <div className="bg-green-100 p-4 rounded-t-lg border-b border-green-100">
-            <h2 className="text-lg font-semibold text-gray-800">Add New Vehicle</h2>
-            <p className="text-sm text-gray-600">Enter details for new vehicle</p>
-          </div>
-          <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Registration Number
-            </label>
-            <input
-                type="text"
-                name="registration_number"
-                value={formData.registration_number}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-                required
-            />
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vehicle Type
-            </label>
-            <select
-                name="vehicle_type_id"
-                value={formData.vehicle_type_id}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-                required
-            >
-                <option value="">Select Vehicle Type</option>
-                {vehicleTypes.map(type => (
-                <option key={type.vehicle_type_id} value={type.vehicle_type_id}>
-                    {type.vehicle_type}
-                </option>
-                ))}
-            </select>
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Production Date
-            </label>
-            <input
-                type="date"
-                name="production_date"
-                value={formData.production_date}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-            />
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Purchase Date
-            </label>
-            <input
-                type="date"
-                name="purchase_date"
-                value={formData.purchase_date}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-            />
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sale Date
-            </label>
-            <input
-                type="date"
-                name="sale_date"
-                value={formData.sale_date}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-            />
-            </div>
-        </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Add Vehicle
-              </button>
-            </form>
-          </div>
+<div className="bg-white rounded-lg shadow-lg border border-green-100">
+  <div className="bg-green-100 p-4 rounded-t-lg border-b border-green-100">
+    <div className="flex justify-between items-center">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800">Add New Vehicle</h2>
+        <p className="text-sm text-gray-600">Enter details for new vehicle</p>
+      </div>
+      <div className="flex gap-2">
+        <label className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray rounded-md hover:bg-gray-100 border border-gray-200 cursor-pointer transition-colors">
+          <Upload className="h-4 w-4" />
+          <span>Import</span>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={handleExcelImport}
+          />
+        </label>
+        <button
+          type="button"
+          onClick={downloadExcelTemplate}
+          className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+        >
+          <Download className="h-4 w-4" />
+          Download Template
+        </button>
+      </div>
+    </div>
+  </div>
+  <div className="p-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Registration Number
+          </label>
+          <input
+            type="text"
+            name="registration_number"
+            value={formData.registration_number}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
 
-        {/* Update Vehicle Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-green-50">
-          <div className="bg-green-50 p-4 rounded-t-lg border-b border-green-50">
-            <h2 className="text-lg font-semibold text-gray-800">Update Vehicle</h2>
-            <p className="text-sm text-gray-600">Modify existing vehicle information</p>
-          </div>
-          <div className="p-6">
-            <form onSubmit={handleUpdateSubmit} className="space-y-4">
-                <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select Vehicle
-                </label>
-                <select
-                    value={selectedVehicle}
-                    onChange={handleVehicleSelect}
-                    className="w-full p-2 border rounded mb-4"
-                >
-                    <option value="">Select a vehicle</option>
-                    {vehicles.map((vehicle) => (
-                    <option key={vehicle.vehicle_id} value={vehicle.vehicle_id}>
-                        {vehicle.vehicle_id}: {vehicle.registration_number}
-                    </option>
-                    ))}
-                </select>
-                </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Vehicle Type
+          </label>
+          <select
+            name="vehicle_type_id"
+            value={formData.vehicle_type_id}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+            required
+          >
+            <option value="">Select Vehicle Type</option>
+            {vehicleTypes.map(type => (
+              <option key={type.vehicle_type_id} value={type.vehicle_type_id}>
+                {type.vehicle_type}
+              </option>
+            ))}
+          </select>
+        </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Registration Number
-                    </label>
-                    <input
-                    type="text"
-                    name="registration_number"
-                    value={updateFormData.registration_number}
-                    onChange={handleUpdateInputChange}
-                    className="w-full p-2 border rounded"
-                    required
-                    disabled={!selectedVehicle}
-                    />
-                </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Production Date
+          </label>
+          <input
+            type="date"
+            name="production_date"
+            value={formData.production_date}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vehicle Type
-                    </label>
-                    <select
-                    name="vehicle_type_id"
-                    value={updateFormData.vehicle_type_id}
-                    onChange={handleUpdateInputChange}
-                    className="w-full p-2 border rounded"
-                    required
-                    disabled={!selectedVehicle}
-                    >
-                    <option value="">Select Vehicle Type</option>
-                    {vehicleTypes.map(type => (
-                        <option key={type.vehicle_type_id} value={type.vehicle_type_id}>
-                        {type.vehicle_type}
-                        </option>
-                    ))}
-                    </select>
-                </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Purchase Date
+          </label>
+          <input
+            type="date"
+            name="purchase_date"
+            value={formData.purchase_date}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Production Date
-                    </label>
-                    <input
-                    type="date"
-                    name="production_date"
-                    value={updateFormData.production_date}
-                    onChange={handleUpdateInputChange}
-                    className="w-full p-2 border rounded"
-                    disabled={!selectedVehicle}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Purchase Date
-                    </label>
-                    <input
-                    type="date"
-                    name="purchase_date"
-                    value={updateFormData.purchase_date}
-                    onChange={handleUpdateInputChange}
-                    className="w-full p-2 border rounded"
-                    disabled={!selectedVehicle}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sale Date
-                    </label>
-                    <input
-                    type="date"
-                    name="sale_date"
-                    value={updateFormData.sale_date}
-                    onChange={handleUpdateInputChange}
-                    className="w-full p-2 border rounded"
-                    disabled={!selectedVehicle}
-                    />
-                </div>
-                </div>
-
-                <button
-                type="submit"
-                disabled={!selectedVehicle || isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                Update Vehicle
-                </button>
-            </form>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Sale Date
+          </label>
+          <input
+            type="date"
+            name="sale_date"
+            value={formData.sale_date}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+          />
         </div>
       </div>
 
-      {isChangeLogOpen && (
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Add Vehicle
+      </button>
+    </form>
+  </div>
+</div>
+
+{/* Update Vehicle Section */}
+<div className="bg-white rounded-lg shadow-lg border border-green-50">
+  <div className="bg-green-50 p-4 rounded-t-lg border-b border-green-50">
+    <div className="flex justify-between items-center">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800">Update Vehicle</h2>
+        <p className="text-sm text-gray-600">Modify existing vehicle information</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!selectedVehicle) {
+            alert('Please select a vehicle first');
+            return;
+          }
+          setIsChangeLogOpen(true);
+        }}
+        className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+      >
+        <History className="h-4 w-4" />
+        View Change Log
+      </button>
+    </div>
+  </div>
+  <div className="p-6">
+  <form onSubmit={handleUpdateSubmit} className="space-y-4">
+    <div className="grid grid-cols-1 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Select Vehicle to Update
+        </label>
+        <select
+          value={selectedVehicle}
+          onChange={handleVehicleSelect}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">Select a vehicle</option>
+          {vehicles.map((vehicle) => (
+            <option key={vehicle.vehicle_id} value={vehicle.vehicle_id}>
+              {vehicle.vehicle_id}: {vehicle.registration_number}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Registration Number
+        </label>
+        <input
+          type="text"
+          name="registration_number"
+          value={updateFormData.registration_number}
+          onChange={handleUpdateInputChange}
+          className="w-full p-2 border rounded"
+          required
+          disabled={!selectedVehicle}
+        />
+      </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Vehicle Type
+            </label>
+            <select
+              name="vehicle_type_id"
+              value={updateFormData.vehicle_type_id}
+              onChange={handleUpdateInputChange}
+              className="w-full p-2 border rounded"
+              required
+              disabled={!selectedVehicle}
+            >
+              <option value="">Select Vehicle Type</option>
+              {vehicleTypes.map(type => (
+                <option key={type.vehicle_type_id} value={type.vehicle_type_id}>
+                  {type.vehicle_type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Production Date
+            </label>
+            <input
+              type="date"
+              name="production_date"
+              value={updateFormData.production_date}
+              onChange={handleUpdateInputChange}
+              className="w-full p-2 border rounded"
+              disabled={!selectedVehicle}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Purchase Date
+            </label>
+            <input
+              type="date"
+              name="purchase_date"
+              value={updateFormData.purchase_date}
+              onChange={handleUpdateInputChange}
+              className="w-full p-2 border rounded"
+              disabled={!selectedVehicle}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sale Date
+            </label>
+            <input
+              type="date"
+              name="sale_date"
+              value={updateFormData.sale_date}
+              onChange={handleUpdateInputChange}
+              className="w-full p-2 border rounded"
+              disabled={!selectedVehicle}
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={!selectedVehicle || isLoading}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Update Vehicle
+        </button>
+        </form>
+  </div>
+</div>
+
+{isChangeLogOpen && (
         <FleetUpdateLogModal
           isOpen={isChangeLogOpen}
           onClose={() => setIsChangeLogOpen(false)}
@@ -607,7 +611,8 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
         />
       )}
     </div>
+    </div>
+    
   );
-};
-
+}
 export default EnvironmentalDataInput;

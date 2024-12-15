@@ -1094,51 +1094,7 @@ useEffect(() => {
         </p>
       </div>
 
-      {/* Quick Actions Bar */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-  <div className="flex gap-4">
-    <label className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer transition-colors">
-      <Upload className="h-4 w-4" />
-      <span>Bulk Import</span>
-      <input
-        type="file"
-        accept=".xlsx,.xls"
-        onChange={handleExcelImport}
-        className="hidden"
-      />
-    </label>
-
-    <button
-      type="button"
-      onClick={downloadExcelTemplate}
-      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
-    >
-      <Download className="h-4 w-4" />
-      Download Template
-    </button>
-
-    <button
-      type="button"
-      onClick={() => {
-        if (!selectedEmployee) {
-          setModalData({
-            type: 'ERROR',
-            title: 'No Employee Selected',
-            message: 'Please select an employee in the Update Employee section to view the change log.'
-          });
-          setIsModalOpen(true);
-        } else {
-          setIsChangeLogOpen(true);
-        }
-      }}
-      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
-    >
-      <Table className="h-4 w-4" />
-      View Change Log
-    </button>
-  </div>
-</div>
-
+    
       {/* Data Quality Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <button
@@ -1214,14 +1170,38 @@ useEffect(() => {
 {/* Main Form Grid Container */}
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add Employee Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
-          <div className="bg-blue-100 p-4 rounded-t-lg border-b border-blue-100">
-            <h2 className="text-lg font-semibold text-gray-800">Add New Employee</h2>
-            <p className="text-sm text-gray-600">Enter details for new employee records</p>
-          </div>
-          <div className="p-6 flex flex-col min-h-[800px]">
-            <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
+  <div className="bg-blue-100 p-4 rounded-t-lg border-b border-blue-100">
+    <div className="flex justify-between items-center">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800">Add New Employee</h2>
+        <p className="text-sm text-gray-600">Enter details for new employee records</p>
+      </div>
+      <div className="flex gap-2">
+        <label className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray rounded-md hover:bg-gray-100 border border-gray-200 cursor-pointer transition-colors">
+          <Upload className="h-4 w-4" />
+          <span>Import</span>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleExcelImport}
+            className="hidden"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={downloadExcelTemplate}
+          className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+        >
+          <Download className="h-4 w-4" />
+          Download Template
+        </button>
+      </div>
+    </div>
+  </div>
+  <div className="p-6 flex flex-col min-h-[800px]">
+    <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column - Input Fields */}
                 <div className="space-y-4">
                   {inputFields.map((field) => (
@@ -1302,128 +1282,139 @@ useEffect(() => {
         </div>
 
         {/* Update Employee Section */}
-        <div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
-          <div className="bg-blue-50 p-4 rounded-t-lg border-b border-blue-100">
-            <h2 className="text-lg font-semibold text-gray-800">Update Employee</h2>
-            <p className="text-sm text-gray-600">Modify existing employee information</p>
+<div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
+  <div className="bg-blue-50 p-4 rounded-t-lg border-b border-blue-100">
+    <div className="flex justify-between items-center">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800">Update Employee</h2>
+        <p className="text-sm text-gray-600">Modify existing employee information</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!selectedEmployee) {
+            setModalData({
+              type: 'ERROR',
+              title: 'No Employee Selected',
+              message: 'Please select an employee to view the change log.'
+            });
+            setIsModalOpen(true);
+          } else {
+            setIsChangeLogOpen(true);
+          }
+        }}
+        className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 border border-gray-200 transition-colors"
+      >
+        <Table className="h-4 w-4" />
+        View Change Log
+      </button>
+    </div>
+  </div>
+  <div className="p-6 h-full flex flex-col">
+    <form onSubmit={handleUpdateSubmit}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Employee
+            </label>
+            <select
+              value={selectedEmployee}
+              onChange={handleEmployeeSelect}
+              disabled={isLoading}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select an employee</option>
+              {employees
+                .filter(employee => employee.company === company)
+                .map((employee) => (
+                  <option key={employee.employee_id} value={employee.employee_id}>
+                    {employee.full_name} (ID: {employee.employee_id})
+                  </option>
+                ))}
+            </select>
           </div>
-          <div className="p-6 h-full flex flex-col">
-            <form onSubmit={handleUpdateSubmit}>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Employee
-                </label>
-                <select
-                  value={selectedEmployee}
-                  onChange={handleEmployeeSelect}
-                  disabled={isLoading}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select an employee</option>
-                  {employees
-                    .filter(employee => employee.company === company)
-                    .map((employee) => (
-                      <option key={employee.employee_id} value={employee.employee_id}>
-                        {employee.full_name} (ID: {employee.employee_id})
-                      </option>
-                    ))}
-                </select>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-4">
-                  {updateInputFields.map((field) => (
-                    <div key={`update-${field.label}`}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {field.label}
-                      </label>
-                      <input
-                        type={field.type}
-                        name={field.label.toLowerCase().replace(/\s+/g, '_')}
-                        value={updateFormData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof updateFormData] || ''}
-                        onChange={handleUpdateInputChange}
-                        disabled={!selectedEmployee}
-                        className={`w-full p-2 border border-gray-300 rounded-md ${
-                          !selectedEmployee ? 'bg-gray-50' : 'bg-white'
-                        } focus:ring-blue-500 focus:border-blue-500`}
-                      />
-                    </div>
-                  ))}
-                </div>
+          {updateInputFields.map((field) => (
+            <div key={`update-${field.label}`}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {field.label}
+              </label>
+              <input
+                type={field.type}
+                name={field.label.toLowerCase().replace(/\s+/g, '_')}
+                value={updateFormData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof updateFormData] || ''}
+                onChange={handleUpdateInputChange}
+                disabled={!selectedEmployee}
+                className={`w-full p-2 border border-gray-300 rounded-md ${
+                  !selectedEmployee ? 'bg-gray-50' : 'bg-white'
+                } focus:ring-blue-500 focus:border-blue-500`}
+              />
+            </div>
+          ))}
+        </div>
 
-                {/* Right Column */}
-                <div className="space-y-4">
-                  {dropdownFields.map((field) => (
-                    <div key={`update-${field.label}`}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {field.label}
-                      </label>
-                      <select
-                        name={field.label.toLowerCase().replace(/\s+/g, '_')}
-                        value={updateFormData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof updateFormData] || ''}
-                        onChange={handleUpdateInputChange}
-                        disabled={!selectedEmployee}
-                        className={`w-full p-2 border border-gray-300 rounded-md ${
-                          !selectedEmployee ? 'bg-gray-50' : 'bg-white'
-                        } focus:ring-blue-500 focus:border-blue-500`}
-                      >
-                        <option value="">{`Select ${field.label}`}</option>
-                        {/* Same options as Add form */}
-                        {field.label === 'Position ID' && positions.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Education ID' && educations.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Marital Status ID' && maritalStatuses.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Gender ID' && genders.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Managerial Position ID' && [
-                          { id: '1', name: 'Yes' },
-                          { id: '2', name: 'No' }
-                        ].map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-auto pt-6">
-                <div className="space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsChangeLogOpen(true)}
-                    disabled={!selectedEmployee}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-                  >
-                    View Change Log
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!selectedEmployee || isLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-                  >
-                    {isLoading ? 
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Saving...</span>
-                      </div>
-                      : 'Save Changes'
-                    }
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+        {/* Right Column */}
+        <div className="space-y-4">
+          {dropdownFields.map((field) => (
+            <div key={`update-${field.label}`}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {field.label}
+              </label>
+              <select
+                name={field.label.toLowerCase().replace(/\s+/g, '_')}
+                value={updateFormData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof updateFormData] || ''}
+                onChange={handleUpdateInputChange}
+                disabled={!selectedEmployee}
+                className={`w-full p-2 border border-gray-300 rounded-md ${
+                  !selectedEmployee ? 'bg-gray-50' : 'bg-white'
+                } focus:ring-blue-500 focus:border-blue-500`}
+              >
+                <option value="">{`Select ${field.label}`}</option>
+                {field.label === 'Position ID' && positions.map((item) => (
+                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
+                ))}
+                {field.label === 'Education ID' && educations.map((item) => (
+                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
+                ))}
+                {field.label === 'Marital Status ID' && maritalStatuses.map((item) => (
+                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
+                ))}
+                {field.label === 'Gender ID' && genders.map((item) => (
+                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
+                ))}
+                {field.label === 'Managerial Position ID' && [
+                  { id: '1', name: 'Yes' },
+                  { id: '2', name: 'No' }
+                ].map((item) => (
+                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
+                ))}
+              </select>
+            </div>
+          ))}
         </div>
       </div>
 
+      <div className="mt-6">
+        <button
+          type="submit"
+          disabled={!selectedEmployee || isLoading}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+        >
+          {isLoading ? 
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Saving...</span>
+            </div>
+            : 'Save Changes'
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
        {/* Modals */}
     {isColumnMappingOpen && selectedFile && (
       <ColumnMappingModal

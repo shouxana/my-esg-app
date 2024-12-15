@@ -180,6 +180,7 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
   }
   router.push(`${window.location.pathname}?${params.toString()}`);
 };
+
   const validateFile = (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
       throw new Error('File size exceeds 10MB limit');
@@ -190,34 +191,59 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
   };
 
   const uploadFile = async (file: File, currentTab: string) => {
+    // Debug log initial data
+    console.log('Starting upload process:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        currentTab
+    });
+  
     const formData = new FormData();
     formData.append('file', file);
     formData.append('company', company || 'unknown');
     
     // Get the section from the URL query parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const section = urlParams.get('view');
+    const view = urlParams.get('view');
     
-    // Log for debugging
-    console.log('Uploading file with section:', section);
-    
-    if (!section) {
-      throw new Error('Section information is missing');
-    }
-    
-    formData.append('section', section);
-  
-    const response = await fetch('/api/upload-pdf', {
-      method: 'POST',
-      body: formData,
+    console.log('URL parameters:', {
+        view,
+        fullUrl: window.location.search
     });
-  
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Error uploading file');
+    
+    if (!view) {
+        throw new Error('Section information (view parameter) is missing from URL');
     }
+    
+    formData.append('section', view);
   
-    return await response.json();
+    console.log('Sending request with:', {
+        section: view,
+        company: company || 'unknown'
+    });
+    
+    try {
+        const response = await fetch('/api/upload-pdf', {
+            method: 'POST',
+            body: formData,
+        });
+  
+        console.log('Upload response status:', response.status);
+  
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Upload error response:', errorData);
+            throw new Error(errorData.message || 'Error uploading file');
+        }
+  
+        const result = await response.json();
+        console.log('Upload success result:', result);
+        return result;
+    } catch (error) {
+        console.error('Upload error details:', error);
+        throw error;
+    }
   };
   
   // Then modify your handleFileUpload function:

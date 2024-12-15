@@ -136,44 +136,76 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
   }, [activeTab]);
 
   const validateFile = (file: File) => {
+    console.log('Validating file:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        maxSize: MAX_FILE_SIZE
+    });
+
     if (file.size > MAX_FILE_SIZE) {
-      throw new Error('File size exceeds 10MB limit');
+        throw new Error(`File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds 10MB limit`);
     }
     if (file.type !== 'application/pdf') {
-      throw new Error('Only PDF files are allowed');
+        throw new Error(`Invalid file type: ${file.type}. Only PDF files are allowed`);
     }
-  };
+};
 
-  const uploadFile = async (file: File, currentTab: string) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('company', company || 'unknown');
-    
-    // Get the section from the URL query parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const section = urlParams.get('view');
-    
-    // Log for debugging
-    console.log('Uploading file with section:', section);
-    
-    if (!section) {
-      throw new Error('Section information is missing');
-    }
-    
-    formData.append('section', section);
+const uploadFile = async (file: File, currentTab: string) => {
+  // Debug log initial data
+  console.log('Starting upload process:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      currentTab
+  });
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('company', company || 'unknown');
   
-    const response = await fetch('/api/upload-pdf', {
-      method: 'POST',
-      body: formData,
-    });
+  // Get the section from the URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const view = urlParams.get('view');
   
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Error uploading file');
-    }
+  console.log('URL parameters:', {
+      view,
+      fullUrl: window.location.search
+  });
   
-    return await response.json();
-  };
+  if (!view) {
+      throw new Error('Section information (view parameter) is missing from URL');
+  }
+  
+  formData.append('section', view);
+
+  console.log('Sending request with:', {
+      section: view,
+      company: company || 'unknown'
+  });
+  
+  try {
+      const response = await fetch('/api/upload-pdf', {
+          method: 'POST',
+          body: formData,
+      });
+
+      console.log('Upload response status:', response.status);
+
+      if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Upload error response:', errorData);
+          throw new Error(errorData.message || 'Error uploading file');
+      }
+
+      const result = await response.json();
+      console.log('Upload success result:', result);
+      return result;
+  } catch (error) {
+      console.error('Upload error details:', error);
+      throw error;
+  }
+};
   
   // Then modify your handleFileUpload function:
   

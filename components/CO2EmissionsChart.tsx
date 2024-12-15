@@ -400,7 +400,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
           <div className="flex justify-between items-center mb-6">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-gray-800">
-                Route Details - {selectedYear}
+                Milage Details - {selectedYear}
               </h2>
               <p className="text-sm text-gray-500" style={{ color: COLORS[activeType || ''] }}>
                 {activeType} Vehicles

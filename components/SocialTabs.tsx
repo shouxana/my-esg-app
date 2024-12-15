@@ -96,13 +96,14 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company, searchParams, router }
   
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}&section=social`);
-      
+      const section = activeTab === 'pdfs' ? 'social' : ''; // Use 'social' only for the 'pdfs' tab
+      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}&section=${section}`);
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch PDFs');
       }
-      
+  
       const data = await response.json();
       setPdfs(data);
     } catch (error) {
@@ -188,10 +189,23 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
     }
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, currentTab: string) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('company', company || 'unknown');
+    
+    // Get the section from the URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('view');
+    
+    // Log for debugging
+    console.log('Uploading file with section:', section);
+    
+    if (!section) {
+      throw new Error('Section information is missing');
+    }
+    
+    formData.append('section', section);
   
     const response = await fetch('/api/upload-pdf', {
       method: 'POST',
@@ -205,19 +219,21 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
   
     return await response.json();
   };
-
+  
+  // Then modify your handleFileUpload function:
+  
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
+  
     setIsUploading(true);
     setUploadProgress(0);
-
+  
     try {
       for (const file of Array.from(files)) {
         try {
           validateFile(file);
-          await uploadFile(file);
+          await uploadFile(file, activeTab);
           toast({
             title: "Success",
             description: `${file.name} uploaded successfully`,
@@ -228,6 +244,7 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
             description: error instanceof Error ? error.message : 'Error uploading file',
             variant: "destructive",
           });
+          console.error('Upload error:', error);
         }
       }
       await fetchPDFs();

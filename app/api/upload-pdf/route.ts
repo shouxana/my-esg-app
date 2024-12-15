@@ -12,26 +12,42 @@ const s3Client = new S3Client({
 
 export async function POST(request: Request) {
   try {
+    // Parse form data
     const formData = await request.formData();
+
+    // Extract form data fields
     const file = formData.get('file') as File;
     const company = formData.get('company') as string;
-    
+    const section = formData.get('section') as string;
+
+    // Validate inputs
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
-
     if (!company) {
       return NextResponse.json({ error: 'Company information required' }, { status: 400 });
     }
+    if (!section) {
+      return NextResponse.json({ error: 'Section information required' }, { status: 400 });
+    }
 
-    // Sanitize company name for use in folder path (remove special chars, spaces, etc)
-    const sanitizedCompany = company.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    // Validate section value
+    const validSections = ['environmental', 'social', 'governance'];
+    const normalizedSection = section.toLowerCase();
     
-    const buffer = await file.arrayBuffer();
-    // Include company name in the file path
-    const fileKey = `pdfs/${sanitizedCompany}/${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+    if (!validSections.includes(normalizedSection)) {
+      return NextResponse.json({ 
+        error: `Invalid section specified. Must be one of: ${validSections.join(', ')}` 
+      }, { status: 400 });
+    }
 
-    // Upload to S3 with proper headers
+    // Process file
+    const buffer = await file.arrayBuffer();
+    const fileName = file.name.replace(/\s+/g, '-');
+    const timestamp = Date.now();
+    const fileKey = `pdfs/test1/${normalizedSection}/${timestamp}-${fileName}`;
+
+    // Upload to S3
     await s3Client.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME!,
@@ -40,15 +56,17 @@ export async function POST(request: Request) {
         ContentType: 'application/pdf',
         ContentDisposition: 'inline',
         Metadata: {
-          'original-filename': file.name,
-          'company': sanitizedCompany
+          'original-filename': fileName,
+          'company': company,
+          'section': normalizedSection,
+          'upload-timestamp': timestamp.toString()
         },
         CacheControl: 'no-cache'
       })
     );
 
-    // Generate a signed URL with specific parameters
-    const url = await getSignedUrl(
+    // Generate signed URL
+    const signedUrl = await getSignedUrl(
       s3Client,
       new GetObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME!,
@@ -56,19 +74,25 @@ export async function POST(request: Request) {
         ResponseContentType: 'application/pdf',
         ResponseContentDisposition: 'inline'
       }),
-      { 
-        expiresIn: 3600
-      }
+      { expiresIn: 3600 }
     );
 
     return NextResponse.json({
       id: fileKey,
-      url: url,
-      name: file.name,
-      size: file.size,
+      url: signedUrl,
+      name: fileName,
+      size: `${(file.size / 1024).toFixed(2)} KB`,
+      uploadDate: new Date().toLocaleDateString(),
+      section: normalizedSection
     });
+
   } catch (error) {
-    console.error('Error uploading to S3:', error);
-    return NextResponse.json({ error: 'Error uploading file' }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: error instanceof Error ? error.message : 'Error uploading file',
+        details: error instanceof Error ? error.stack : undefined
+      }, 
+      { status: 500 }
+    );
   }
 }

@@ -107,13 +107,14 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
   
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}&section=environmental`);
-      
+      const section = activeTab === 'pdfs' ? 'environmental' : ''; // Use 'environmental' only for the 'pdfs' tab
+      const response = await fetch(`/api/list-pdfs?company=${encodeURIComponent(company)}&section=${section}`);
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch PDFs');
       }
-      
+  
       const data = await response.json();
       setPdfs(data);
     } catch (error) {
@@ -143,10 +144,23 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
     }
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, currentTab: string) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('company', company || 'unknown'); // Use the company prop
+    formData.append('company', company || 'unknown');
+    
+    // Get the section from the URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('view');
+    
+    // Log for debugging
+    console.log('Uploading file with section:', section);
+    
+    if (!section) {
+      throw new Error('Section information is missing');
+    }
+    
+    formData.append('section', section);
   
     const response = await fetch('/api/upload-pdf', {
       method: 'POST',
@@ -160,19 +174,21 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
   
     return await response.json();
   };
-
+  
+  // Then modify your handleFileUpload function:
+  
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
+  
     setIsUploading(true);
     setUploadProgress(0);
-
+  
     try {
       for (const file of Array.from(files)) {
         try {
           validateFile(file);
-          await uploadFile(file);
+          await uploadFile(file, activeTab);
           toast({
             title: "Success",
             description: `${file.name} uploaded successfully`,
@@ -183,9 +199,9 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
             description: error instanceof Error ? error.message : 'Error uploading file',
             variant: "destructive",
           });
+          console.error('Upload error:', error);
         }
       }
-      // Refresh the PDFs list after upload
       await fetchPDFs();
     } finally {
       setIsUploading(false);

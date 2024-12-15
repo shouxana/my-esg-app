@@ -1170,7 +1170,7 @@ useEffect(() => {
 {/* Main Form Grid Container */}
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add Employee Section */}
-<div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
+<div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[700px]">
   <div className="bg-blue-100 p-4 rounded-t-lg border-b border-blue-100">
     <div className="flex justify-between items-center">
       <div>
@@ -1200,68 +1200,198 @@ useEffect(() => {
     </div>
   </div>
   <div className="p-6 flex flex-col min-h-[800px]">
-    <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column - Input Fields */}
-                <div className="space-y-4">
-                  {inputFields.map((field) => (
-                    <div key={field.label}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {field.label}
-                      </label>
-                      <input
-                        type={field.type}
-                        name={field.label.toLowerCase().replace(/\s+/g, '_')}
-                        value={formData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof formData] || ''}
-                        onChange={handleInputChange}
-                        required={field.label !== 'Termination Date' && 
-                          field.label !== 'Leave Date Start' && 
-                          field.label !== 'Leave Start End'}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                      />
-                    </div>
-                  ))}
-                </div>
+  <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+    <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      {/* Left Column */}
+      <div className="space-y-4 w-full">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
+          </label>
+          <input
+            type="text"
+            name="full_name"
+            value={formData.full_name}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          />
+        </div>
 
-                {/* Right Column - Dropdowns */}
-                <div className="space-y-4">
-                  {dropdownFields.map((field) => (
-                    <div key={field.label}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {field.label}
-                      </label>
-                      <select
-                        name={field.label.toLowerCase().replace(/\s+/g, '_')}
-                        value={formData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof formData] || ''}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                      >
-                        <option value="">{`Select ${field.label}`}</option>
-                        {field.label === 'Position ID' && positions.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Education ID' && educations.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Marital Status ID' && maritalStatuses.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Gender ID' && genders.map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                        {field.label === 'Managerial Position ID' && [
-                          { id: '1', name: 'Yes' },
-                          { id: '2', name: 'No' }
-                        ].map((item) => (
-                          <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Employee Mail
+          </label>
+          <input
+            type="email"
+            name="employee_mail"
+            value={formData.employee_mail}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          />
+        </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Birth Date
+          </label>
+          <input
+            type="date"
+            name="birth_date"
+            value={formData.birth_date}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Employment Date
+          </label>
+          <input
+            type="date"
+            name="employment_date"
+            value={formData.employment_date}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Termination Date
+          </label>
+          <input
+            type="date"
+            name="termination_date"
+            value={formData.termination_date}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Leave Date Start
+          </label>
+          <input
+            type="date"
+            name="leave_date_start"
+            value={formData.leave_date_start}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Leave Date End
+          </label>
+          <input
+            type="date"
+            name="leave_date_end"
+            value={formData.leave_date_end}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+          />
+        </div>
+      </div>
+
+      {/* Right Column */}
+      <div className="space-y-4 w-full">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Position ID
+          </label>
+          <select
+            name="position_id"
+            value={formData.position_id}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          >
+            <option value="">Select Position ID</option>
+            {positions.map(pos => (
+              <option key={pos.id} value={pos.id}>{pos.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Education ID
+          </label>
+          <select
+            name="education_id"
+            value={formData.education_id}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          >
+            <option value="">Select Education ID</option>
+            {educations.map(edu => (
+              <option key={edu.id} value={edu.id}>{edu.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Marital Status ID
+          </label>
+          <select
+            name="marital_status_id"
+            value={formData.marital_status_id}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          >
+            <option value="">Select Marital Status</option>
+            {maritalStatuses.map(status => (
+              <option key={status.id} value={status.id}>{status.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Gender ID
+          </label>
+          <select
+            name="gender_id"
+            value={formData.gender_id}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          >
+            <option value="">Select Gender</option>
+            {genders.map(gender => (
+              <option key={gender.id} value={gender.id}>{gender.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Managerial Position ID
+          </label>
+          <select
+            name="managerial_position_id"
+            value={formData.managerial_position_id}
+            onChange={handleInputChange}
+            className="w-full h-10 p-2 border rounded-md"
+            required
+          >
+            <option value="">Select Managerial Position</option>
+            <option value="1">Yes</option>
+            <option value="2">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
               <div className="mt-auto pt-6">
                 <button
                   type="submit"
@@ -1281,7 +1411,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Update Employee Section */}
+       {/* Update Employee Section */}
 <div className="bg-white rounded-lg shadow-lg border border-blue-100 min-h-[800px]">
   <div className="bg-blue-50 p-4 rounded-t-lg border-b border-blue-100">
     <div className="flex justify-between items-center">
@@ -1310,109 +1440,250 @@ useEffect(() => {
       </button>
     </div>
   </div>
-  <div className="p-6 h-full flex flex-col">
-    <form onSubmit={handleUpdateSubmit}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div className="p-6 flex flex-col min-h-[800px]">
+    <form onSubmit={handleUpdateSubmit} className="flex flex-col flex-1">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Select Employee
+        </label>
+        <select
+          value={selectedEmployee}
+          onChange={handleEmployeeSelect}
+          disabled={isLoading}
+          className="w-full h-10 p-2 border rounded-md mb-4"
+        >
+          <option value="">Select an employee</option>
+          {employees
+            .filter(employee => employee.company === company)
+            .map((employee) => (
+              <option key={employee.employee_id} value={employee.employee_id}>
+                {employee.full_name} (ID: {employee.employee_id})
+              </option>
+            ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         {/* Left Column */}
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Employee
+              Full Name
             </label>
-            <select
-              value={selectedEmployee}
-              onChange={handleEmployeeSelect}
-              disabled={isLoading}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select an employee</option>
-              {employees
-                .filter(employee => employee.company === company)
-                .map((employee) => (
-                  <option key={employee.employee_id} value={employee.employee_id}>
-                    {employee.full_name} (ID: {employee.employee_id})
-                  </option>
-                ))}
-            </select>
+            <input
+              type="text"
+              name="full_name"
+              value={updateFormData.full_name}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            />
           </div>
 
-          {updateInputFields.map((field) => (
-            <div key={`update-${field.label}`}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                name={field.label.toLowerCase().replace(/\s+/g, '_')}
-                value={updateFormData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof updateFormData] || ''}
-                onChange={handleUpdateInputChange}
-                disabled={!selectedEmployee}
-                className={`w-full p-2 border border-gray-300 rounded-md ${
-                  !selectedEmployee ? 'bg-gray-50' : 'bg-white'
-                } focus:ring-blue-500 focus:border-blue-500`}
-              />
-            </div>
-          ))}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Employee Mail
+            </label>
+            <input
+              type="email"
+              name="employee_mail"
+              value={updateFormData.employee_mail}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Birth Date
+            </label>
+            <input
+              type="date"
+              name="birth_date"
+              value={updateFormData.birth_date}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Employment Date
+            </label>
+            <input
+              type="date"
+              name="employment_date"
+              value={updateFormData.employment_date}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Termination Date
+            </label>
+            <input
+              type="date"
+              name="termination_date"
+              value={updateFormData.termination_date}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Leave Date Start
+            </label>
+            <input
+              type="date"
+              name="leave_date_start"
+              value={updateFormData.leave_date_start}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Leave Date End
+            </label>
+            <input
+              type="date"
+              name="leave_date_end"
+              value={updateFormData.leave_date_end}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+            />
+          </div>
         </div>
 
         {/* Right Column */}
-        <div className="space-y-4">
-          {dropdownFields.map((field) => (
-            <div key={`update-${field.label}`}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label}
-              </label>
-              <select
-                name={field.label.toLowerCase().replace(/\s+/g, '_')}
-                value={updateFormData[field.label.toLowerCase().replace(/\s+/g, '_') as keyof typeof updateFormData] || ''}
-                onChange={handleUpdateInputChange}
-                disabled={!selectedEmployee}
-                className={`w-full p-2 border border-gray-300 rounded-md ${
-                  !selectedEmployee ? 'bg-gray-50' : 'bg-white'
-                } focus:ring-blue-500 focus:border-blue-500`}
-              >
-                <option value="">{`Select ${field.label}`}</option>
-                {field.label === 'Position ID' && positions.map((item) => (
-                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                ))}
-                {field.label === 'Education ID' && educations.map((item) => (
-                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                ))}
-                {field.label === 'Marital Status ID' && maritalStatuses.map((item) => (
-                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                ))}
-                {field.label === 'Gender ID' && genders.map((item) => (
-                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                ))}
-                {field.label === 'Managerial Position ID' && [
-                  { id: '1', name: 'Yes' },
-                  { id: '2', name: 'No' }
-                ].map((item) => (
-                  <option key={item.id} value={item.id}>{item.id}: {item.name}</option>
-                ))}
-              </select>
-            </div>
-          ))}
+        <div className="space-y-4 w-full">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Position ID
+            </label>
+            <select
+              name="position_id"
+              value={updateFormData.position_id}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            >
+              <option value="">Select Position ID</option>
+              {positions.map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Education ID
+            </label>
+            <select
+              name="education_id"
+              value={updateFormData.education_id}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            >
+              <option value="">Select Education ID</option>
+              {educations.map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Marital Status ID
+            </label>
+            <select
+              name="marital_status_id"
+              value={updateFormData.marital_status_id}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            >
+              <option value="">Select Marital Status</option>
+              {maritalStatuses.map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Gender ID
+            </label>
+            <select
+              name="gender_id"
+              value={updateFormData.gender_id}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            >
+              <option value="">Select Gender</option>
+              {genders.map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Managerial Position ID
+            </label>
+            <select
+              name="managerial_position_id"
+              value={updateFormData.managerial_position_id}
+              onChange={handleUpdateInputChange}
+              disabled={!selectedEmployee}
+              className="w-full h-10 p-2 border rounded-md"
+              required
+            >
+              <option value="">Select Managerial Position</option>
+              <option value="1">Yes</option>
+              <option value="2">No</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6">
-        <button
-          type="submit"
-          disabled={!selectedEmployee || isLoading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-        >
-          {isLoading ? 
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Saving...</span>
-            </div>
-            : 'Save Changes'
-          }
-        </button>
-      </div>
-    </form>
-  </div>
+      <div className="mt-auto pt-6">
+      <button
+        type="submit"
+        disabled={!selectedEmployee || isLoading}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+      >
+        {isLoading ? 
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Saving...</span>
+          </div>
+          : 'Save Changes'
+        }
+      </button>
+    </div>
+  </form>
+</div>
 </div>
 </div>
        {/* Modals */}

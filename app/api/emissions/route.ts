@@ -19,6 +19,17 @@ type FormattedData = {
       [vehicleType: string]: number;
     };
   };
+  routeData: {
+    [year: number]: {
+      [vehicleType: string]: {
+        vehicleId: string;
+        routeStartTime: string;
+        routeEndTime: string;
+        routeDistance: number;
+        fuelUsed: number;
+      }[];
+    };
+  };
 };
 
 interface YearlyEmission {
@@ -144,15 +155,37 @@ export async function GET(request: Request) {
         ORDER BY lfy.year, vt.vehicle_type;
       `;
 
+      const routeDataQuery = `
+        WITH last_four_years AS (
+          SELECT generate_series($1, $1 + 3) AS year
+        )
+        SELECT 
+          EXTRACT(YEAR FROM r.information_dt)::integer as year,
+          vt.vehicle_type,
+          cast(f.vehicle_id as text) as vehicle_id,
+          r.route_start_time,
+          r.route_end_time,
+          r.route_distance,
+          r.fuel_used
+        FROM public."Routes" r
+        JOIN public."Fleet" f ON r.vehicle_id = cast(f.vehicle_id as text)
+        JOIN public."Vehicle_Type" vt ON f.vehicle_type_id = vt.vehicle_type_id
+        WHERE 
+          lower(f.company) = lower($2)
+          AND EXTRACT(YEAR FROM r.information_dt) BETWEEN $1 AND $1 + 3
+          AND r.information_dt IS NOT NULL
+          AND r.route_distance IS NOT NULL
+          AND r.fuel_used IS NOT NULL
+        ORDER BY year, vehicle_type, r.information_dt;
+      `;
 
-
-      const [vehicleTypesResult, fleetResult, emissionsResult, distanceResult] = await Promise.all([
+      const [vehicleTypesResult, fleetResult, emissionsResult, distanceResult, routeDataResult] = await Promise.all([
         client.query(vehicleTypesQuery),
         client.query(fleetQuery, [years[0], company]),
         client.query(emissionsQuery, [years[0], company]),
-        client.query(distanceQuery, [years[0], company])
+        client.query(distanceQuery, [years[0], company]),
+        client.query(routeDataQuery, [years[0], company])
       ]);
-
 
       const formattedData: FormattedData = {
         years,
@@ -160,7 +193,8 @@ export async function GET(request: Request) {
         emissionsData: {},
         yearlyEmissions: [],
         vehicleTypes: vehicleTypesResult.rows.map(row => row.vehicle_type),
-        distanceData: {}
+        distanceData: {},
+        routeData: {}
       };
 
       // Format fleet data
@@ -230,6 +264,26 @@ export async function GET(request: Request) {
           .forEach(row => {
             formattedData.distanceData[year][row.vehicle_type] = parseFloat(row.distance) || 0;
           });
+      });
+
+      // Initialize routeData
+      formattedData.routeData = {};
+      years.forEach(year => {
+        formattedData.routeData[year] = {};
+        formattedData.vehicleTypes.forEach(type => {
+          formattedData.routeData[year][type] = [];
+        });
+      });
+
+      // Populate routeData
+      routeDataResult.rows.forEach(row => {
+        formattedData.routeData[row.year][row.vehicle_type].push({
+          vehicleId: row.vehicle_id,
+          routeStartTime: row.route_start_time,
+          routeEndTime: row.route_end_time,
+          routeDistance: parseFloat(row.route_distance),
+          fuelUsed: parseFloat(row.fuel_used)
+        });
       });
 
       return NextResponse.json(formattedData);

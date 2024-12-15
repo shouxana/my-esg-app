@@ -92,7 +92,7 @@ const CO2EmissionsChart: React.FC<CO2EmissionsChartProps> = ({ company }) => {
               <h3 className="text-2xl font-bold">{yearlyDistance.toLocaleString()} km</h3>
               {percentageChange && (
                 <p className={`text-sm ${Number(percentageChange) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {Number(percentageChange) >= 0 ? '↑' : '↓'} {Math.abs(Number(percentageChange))}%
+                  {Number(percentageChange) >= 0 ? '↑' : '↓'} {Math.abs(Number(percentageChange))}% vs prev year
                 </p>
               )}
             </div>

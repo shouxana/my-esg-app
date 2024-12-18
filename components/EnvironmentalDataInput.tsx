@@ -335,7 +335,7 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-white-100 to-white-50 p-6 rounded-lg shadow-sm border-2 border-green-300">
+      <div className="bg-white p-6 rounded-lg shadow-sm border-2 border-green-300">
         <div className="flex items-center gap-3 mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Environmental Data Management</h1>
         </div>

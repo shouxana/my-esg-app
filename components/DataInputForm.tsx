@@ -1084,7 +1084,7 @@ useEffect(() => {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-100 to-blue-50 p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-gradient-to-r from-white-100 to-white-50 p-6 rounded-lg shadow-sm border-2 border-blue-300">
         <div className="flex items-center gap-3 mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Social Data Management</h1>
           

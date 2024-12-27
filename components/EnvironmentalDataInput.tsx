@@ -178,6 +178,7 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
   };
 
   const handleVehicleSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.preventDefault();
     const vehicleId = e.target.value;
     if (!vehicleId) {
       setSelectedVehicle('');

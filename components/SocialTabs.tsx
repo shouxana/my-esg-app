@@ -12,6 +12,7 @@ import EducationChart from './EducationChart';
 import GenderDistributionChart from './GenderDistributionChart';
 import EmployeeFluctuationChart from './EmployeeFluctuationChart';
 import LeaveTrackingChart from './EmployeeLeaveChart';
+import ModuleNavigation from './ModuleNavigation';
 import {
   Dialog,
   DialogContent,
@@ -66,23 +67,7 @@ const SocialTabs: React.FC<SocialTabsProps> = ({ company, searchParams, router }
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { toast } = useToast();
 
-  const tabs: Record<'input' | 'visuals' | 'pdfs', TabType> = {
-    input: {
-      label: 'Data Input',
-      icon: FormInput,
-      color: 'text-blue-600 border-blue-600',
-    },
-    visuals: {
-      label: 'Visuals',
-      icon: BarChart2,
-      color: 'text-blue-600 border-blue-600',
-    },
-    pdfs: {
-      label: 'Uploaded Documents',
-      icon: FileText,
-      color: 'text-blue-600 border-blue-600',
-    },
-  };
+
 
   const fetchPDFs = async () => {
     if (!company) {
@@ -169,11 +154,9 @@ useEffect(() => {
 // Fix the handleTabChange function
 const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
   setActiveTab(tab);
-  
-  // Update URL while preserving other parameters
   const params = new URLSearchParams(window.location.search);
   params.set('tab', tab);
-  // Preserve the view parameter if it exists
+  // Preserve the view parameter
   const currentView = searchParams.get('view');
   if (currentView) {
     params.set('view', currentView);
@@ -391,7 +374,7 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
   );
 
   const PDFManagement = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full"> {/* Ensure it takes full height */}
       <div className="flex items-center gap-4">
         <Button
           onClick={() => document.getElementById('pdf-upload')?.click()}
@@ -430,7 +413,7 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
           </div>
         )}
       </div>
-
+  
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Uploaded Documents</h3>
         {isLoading ? (
@@ -490,48 +473,34 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
   }
 
   return (
-    <div className="w-full">
-      <div className="sticky top-0 z-50">
-        <div className="bg-gradient-to-r from-blue-100 to-blue-50 p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
-          <nav className="flex space-x-8 px-4" aria-label="Tabs">
-            {Object.entries(tabs).map(([key, tab]) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleTabChange(key as typeof activeTab)}
-                  className={`
-                    group inline-flex items-center py-3 px-4 rounded-md font-medium text-sm transition-colors
-                    ${activeTab === key
-                      ? `${tab.color} bg-white shadow-md`
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-100'}
-                  `}
-                >
-                  <Icon className="mr-2 h-5 w-5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
+    <div className="flex h-screen bg-gray-100">
+      <ModuleNavigation 
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onReturnHome={() => router.push('/dashboard')}
+        onLogout={() => {
+          sessionStorage.clear();
+          router.push('/auth');
+        }}
+        moduleColor="text-emerald-400"
+      />
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          {activeTab === 'input' && company && (
+            <DataInputForm company={company} />
+          )}
+          {activeTab === 'visuals' && (
+            <div className="space-y-6">
+              <EducationChart company={company} />
+              <GenderDistributionChart years={years} company={company} />
+              <EmployeeFluctuationChart company={company} />
+              <LeaveTrackingChart company={company} />
+            </div>
+          )}
+          {activeTab === 'pdfs' && (
+            <PDFManagement />
+          )}
         </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="mt-4">
-        {activeTab === 'input' && company && (
-          <DataInputForm company={company} />
-        )}
-        {activeTab === 'visuals' && (
-          <div className="space-y-6">
-            <EducationChart company={company} />
-            <GenderDistributionChart years={years} company={company} />
-            <EmployeeFluctuationChart company={company} />
-            <LeaveTrackingChart company={company} />
-          </div>
-        )}
-        {activeTab === 'pdfs' && (
-          <PDFManagement />
-        )}
       </div>
     </div>
   );

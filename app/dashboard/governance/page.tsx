@@ -1,71 +1,115 @@
-// Governance Page
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
+import ESGNavigation from '@/components/ESGNavigation';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface UserData {
- email: string;
- company: string;
+  email: string;
+  company: string;
+  user_name: string;
+  user_lastname: string;
 }
 
 export default function GovernancePage() {
- const router = useRouter();
- const [userData, setUserData] = useState<UserData | null>(null);
- const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
- useEffect(() => {
-   const checkAuth = () => {
-     const storedUserData = sessionStorage.getItem('userData');
-     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-     
-     if (storedUserData && isLoggedIn === 'true') {
-       setUserData(JSON.parse(storedUserData));
-     } else {
-       router.push('/auth');
-     }
-     setIsLoading(false);
-   };
-   checkAuth();
- }, [router]);
+  useEffect(() => {
+    const checkAuth = () => {
+      try {
+        const storedUserData = sessionStorage.getItem('userData');
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        
+        if (storedUserData && isLoggedIn === 'true') {
+          setUserData(JSON.parse(storedUserData));
+        } else {
+          router.push('/auth');
+        }
+      } catch (error) {
+        console.error('Authentication check failed:', error);
+        router.push('/auth');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
- const handleLogout = () => {
-   sessionStorage.clear();
-   router.push('/auth');
- };
+    checkAuth();
+  }, [router]);
 
- if (isLoading) return <LoadingSpinner />;
- if (!userData) return null;
+  const handleLogout = () => {
+    try {
+      sessionStorage.clear();
+      router.push('/auth');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
- return (
-   <>
-     <div className="space-y-6">
-       <div className="flex justify-between items-center">
-         <div>
-           <h1 className="text-2xl font-bold tracking-tight">Governance Metrics</h1>
-           <p className="text-muted-foreground">
-             Monitor and maintain governance compliance
-           </p>
-         </div>
-       </div>
-       <Card>
-         <CardHeader>
-           <CardTitle>Governance Dashboard</CardTitle>
-           <CardDescription>
-             Coming soon - Governance metrics dashboard
-           </CardDescription>
-         </CardHeader>
-       </Card>
-     </div>
-     <button
-       onClick={handleLogout}
-       className="fixed bottom-0 left-0 w-64 bg-red-600 hover:bg-red-700 p-4 text-white font-medium flex items-center justify-center"
-     >
-       <LogOut className="h-5 w-5 mr-2" />
-       <span>Logout</span>
-     </button>
-   </>
- );
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!userData) {
+    return null;
+  }
+
+  return (
+    <div className="flex h-screen">
+      <ESGNavigation 
+        activeModule="governance"
+        onLogout={handleLogout}
+        userData={userData}
+      />
+      <div className="flex-1 overflow-auto">
+        <div className="p-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Governance Metrics</h1>
+              <p className="text-muted-foreground">
+                Monitor and maintain governance compliance
+              </p>
+            </div>
+          </div>
+          
+          {/* Governance Content */}
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Compliance Overview</CardTitle>
+                <CardDescription>
+                  Track your organization's compliance metrics and governance standards
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Risk Management</CardTitle>
+                <CardDescription>
+                  Monitor and assess organizational risks and mitigation strategies
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Policy Management</CardTitle>
+                <CardDescription>
+                  Manage and track corporate policies and procedures
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <div className="text-sm text-muted-foreground text-center">
+              <p>Additional governance features coming soon...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

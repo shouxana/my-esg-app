@@ -1,14 +1,17 @@
+// app/environmental/page.tsx
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LogOut } from 'lucide-react';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import ESGNavigation from '@/components/ESGNavigation';
 import EnvironmentTabs from '@/components/EnvironmentTabs';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface UserData {
   email: string;
   company: string;
+  user_name: string;
+  user_lastname: string;
 }
 
 export default function EnvironmentalPage() {
@@ -46,29 +49,29 @@ export default function EnvironmentalPage() {
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Environmental Metrics</h1>
-            <p className="text-muted-foreground">
-              Manage and monitor your environmental impact data
-            </p>
+    <div className="flex h-screen">
+      <ESGNavigation 
+        activeModule="environmental"
+        onLogout={handleLogout}
+        userData={userData}
+      />
+      <div className="flex-1 overflow-auto">
+        <div className="p-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Environmental Metrics</h1>
+              <p className="text-muted-foreground">
+                Manage and monitor your environmental impact data
+              </p>
+            </div>
           </div>
+          <EnvironmentTabs 
+            company={userData.company}
+            router={router}
+            searchParams={searchParams}
+          />
         </div>
-        <EnvironmentTabs 
-          company={userData.company}
-          router={router}
-          searchParams={searchParams}
-        />
       </div>
-      <button
-        onClick={handleLogout}
-        className="fixed bottom-0 left-0 w-64 bg-red-600 hover:bg-red-700 p-4 text-white font-medium flex items-center justify-center"
-      >
-        <LogOut className="h-5 w-5 mr-2" />
-        <span>Logout</span>
-      </button>
-    </>
+    </div>
   );
 }

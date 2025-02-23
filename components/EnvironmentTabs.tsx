@@ -27,6 +27,7 @@ import {
 import CO2EmissionsChart from './CO2EmissionsChart';
 import UtilityConsumption from './UtilityConsumption';
 import EnvironmentalDataInput from './EnvironmentalDataInput';
+import ModuleNavigation from './ModuleNavigation';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 interface TabType {
@@ -70,23 +71,7 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { toast } = useToast();
 
-  const tabs: Record<'input' | 'visuals' | 'pdfs', TabType> = {
-    input: {
-      label: 'Data Input',
-      icon: FormInput,
-      color: 'text-emerald-600 border-emerald-600',
-    },
-    visuals: {
-      label: 'Visuals',
-      icon: BarChart2,
-      color: 'text-emerald-600 border-emerald-600',
-    },
-    pdfs: {
-      label: 'Uploaded Documents',
-      icon: FileText,
-      color: 'text-emerald-600 border-emerald-600',
-    },
-  };
+  
   // Add useEffect to handle URL changes
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -244,12 +229,10 @@ const uploadFile = async (file: File, currentTab: string) => {
 
   const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
     setActiveTab(tab);
-    
-    // Update URL while preserving other parameters
     const params = new URLSearchParams(window.location.search);
     params.set('tab', tab);
     // Preserve the view parameter
-    const currentView = params.get('view');
+    const currentView = searchParams.get('view');
     if (currentView) {
       params.set('view', currentView);
     }
@@ -465,43 +448,59 @@ const uploadFile = async (file: File, currentTab: string) => {
   }
 
   return (
-    <div className="w-full">
-      <div className="sticky top-0 z-50">
-        <div className="bg-gradient-to-r from-green-100 to-green-50 p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
-          <nav className="flex space-x-8 px-4" aria-label="Tabs">
-            {Object.entries(tabs).map(([key, tab]) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleTabChange(key as typeof activeTab)}
-                  className={`
-                    group inline-flex items-center py-3 px-4 rounded-md font-medium text-sm transition-colors
-                    ${activeTab === key
-                      ? `${tab.color} bg-white shadow-md`
-                      : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-100'}
-                  `}
-                >
-                  <Icon className="mr-2 h-5 w-5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        {activeTab === 'input' && (
-          <EnvironmentalDataInput company={company} />
-        )}
-        {activeTab === 'visuals' && (
-          <div className="space-y-6">
-            <CO2EmissionsChart company={company} />
-            <UtilityConsumption company={company} />
+    <div className="flex h-screen bg-gray-100">
+      <ModuleNavigation 
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onReturnHome={() => router.push('/dashboard')}
+        onLogout={() => {
+          sessionStorage.clear();
+          router.push('/auth');
+        }}
+        moduleColor="text-emerald-400"
+      />
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          <div className="w-full">
+            {/* <div className="sticky top-0 z-50">
+              <div className="bg-gradient-to-r from-green-100 to-green-50 p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
+                <nav className="flex space-x-8 px-4" aria-label="Tabs">
+                  {Object.entries(tabs).map(([key, tab]) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => handleTabChange(key as typeof activeTab)}
+                        className={`
+                          group inline-flex items-center py-3 px-4 rounded-md font-medium text-sm transition-colors
+                          ${activeTab === key
+                            ? `${tab.color} bg-white shadow-md`
+                            : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-100'}
+                        `}
+                      >
+                        <Icon className="mr-2 h-5 w-5" />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div> */}
+  
+            <div className="mt-4">
+              {activeTab === 'input' && (
+                <EnvironmentalDataInput company={company} />
+              )}
+              {activeTab === 'visuals' && (
+                <div className="space-y-6">
+                  <CO2EmissionsChart company={company} />
+                  <UtilityConsumption company={company} />
+                </div>
+              )}
+              {activeTab === 'pdfs' && <PDFManagement />}
+            </div>
           </div>
-        )}
-        {activeTab === 'pdfs' && <PDFManagement />}
+        </div>
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ interface TabType {
     company?: string;
     searchParams: ReadonlyURLSearchParams;
     router: ReturnType<typeof useRouter>;
+    onReturnHome: () => void;
   }
 
 interface PDFFile {
@@ -52,7 +53,7 @@ interface PDFFile {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams, router }) => {
+const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams, router, onReturnHome }) => {
   // Initialize state from URL parameters
   const [activeTab, setActiveTab] = useState<'input' | 'visuals' | 'pdfs'>(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -71,6 +72,7 @@ const EnvironmentTabs: React.FC<EnvironmentTabsProps> = ({ company, searchParams
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { toast } = useToast();
 
+  
   
   // Add useEffect to handle URL changes
   useEffect(() => {
@@ -452,7 +454,7 @@ const uploadFile = async (file: File, currentTab: string) => {
       <ModuleNavigation 
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onReturnHome={() => router.push('/dashboard')}
+        onReturnHome={onReturnHome} 
         onLogout={() => {
           sessionStorage.clear();
           router.push('/auth');

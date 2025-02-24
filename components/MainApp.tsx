@@ -60,6 +60,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
         const sessionIsLoggedIn = sessionStorage.getItem('isLoggedIn');
         const sessionUserData = sessionStorage.getItem('userData');
         const viewFromUrl = searchParams.get('view') as ViewTypes;
+        const pathname = window.location.pathname;
         
         if (sessionIsLoggedIn === 'true' && sessionUserData) {
           const parsedUserData = JSON.parse(sessionUserData);
@@ -73,7 +74,15 @@ const MainApp = ({ initialView }: MainAppProps) => {
             setCurrentView(initialView as ViewTypes);
             setShowLanding(false);
           }
+          if (pathname === '/dashboard' && !viewFromUrl) {
+            setShowLanding(true);
+          } else if (viewFromUrl) {
+            setCurrentView(viewFromUrl);
+            setShowLanding(false);
+          }
+
         }
+        
       } catch (error) {
         console.error('Error initializing app:', error);
       } finally {
@@ -100,6 +109,11 @@ const MainApp = ({ initialView }: MainAppProps) => {
     setShowLanding(true);
     sessionStorage.setItem('isLoggedIn', 'true');
     storeUserData(userData);
+  };
+
+  const handleReturnHome = () => {
+    setShowLanding(true);
+    router.push('/dashboard');
   };
 
   const handleViewSelect = (view: ViewTypes) => {
@@ -169,6 +183,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
             company={userData?.company} 
             searchParams={searchParams}
             router={router}
+            onReturnHome={handleReturnHome}
           />
         )}
         {currentView === 'environmental' && (
@@ -176,6 +191,7 @@ const MainApp = ({ initialView }: MainAppProps) => {
             company={userData?.company} 
             searchParams={searchParams}
             router={router}
+            onReturnHome={handleReturnHome}
           />
         )}
         {currentView === 'governance' && (

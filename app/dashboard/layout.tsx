@@ -7,11 +7,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isMainDashboard = pathname === '/dashboard';
-
   return (
-    <div className="flex-1">
+    <div className="min-h-screen">
       {children}
     </div>
   );

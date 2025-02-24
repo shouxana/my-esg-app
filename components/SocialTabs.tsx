@@ -49,11 +49,12 @@ interface SocialTabsProps {
   company?: string;
   searchParams: ReadonlyURLSearchParams;
   router: ReturnType<typeof useRouter>;
+  onReturnHome: () => void;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-const SocialTabs: React.FC<SocialTabsProps> = ({ company, searchParams, router }) => {
+const SocialTabs: React.FC<SocialTabsProps> = ({ company, searchParams, router, onReturnHome }) => {
   const [activeTab, setActiveTab] = useState<'input' | 'visuals' | 'pdfs'>('input');
   const [years, setYears] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -477,7 +478,7 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
       <ModuleNavigation 
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onReturnHome={() => router.push('/dashboard')}
+        onReturnHome={onReturnHome} 
         onLogout={() => {
           sessionStorage.clear();
           router.push('/auth');

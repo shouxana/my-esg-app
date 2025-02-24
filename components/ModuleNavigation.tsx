@@ -1,5 +1,6 @@
 import React from 'react';
 import { FormInput, BarChart2, FileText, Home, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -35,18 +36,24 @@ const NavItem = ({ icon: Icon, label, isActive, onClick, color = 'text-white' }:
 interface ModuleNavigationProps {
   activeTab: 'input' | 'visuals' | 'pdfs';
   onTabChange: (tab: 'input' | 'visuals' | 'pdfs') => void;
-  onReturnHome: () => void;
+  onReturnHome?: () => void;  // Make this optional since we'll handle navigation internally
   onLogout: () => void;
-  moduleColor?: string; // To customize the active color based on module
+  moduleColor?: string;
 }
 
 const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
   activeTab,
   onTabChange,
-  onReturnHome,
   onLogout,
-  moduleColor = 'text-blue-400' // Default to blue if no color provided
+  moduleColor = 'text-blue-400'
 }) => {
+  const router = useRouter();
+
+  const handleReturnHome = () => {
+    // Clear any existing query parameters and navigate to dashboard
+    router.push('/dashboard');
+  };
+
   return (
     <div className="w-16 bg-slate-800 flex flex-col items-center py-6">
       {/* Logo/Brand */}
@@ -86,7 +93,7 @@ const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
         <NavItem
           icon={Home}
           label="Return Home"
-          onClick={onReturnHome}
+          onClick={handleReturnHome}
         />
         <NavItem
           icon={LogOut}

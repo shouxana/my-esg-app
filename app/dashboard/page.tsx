@@ -1,8 +1,15 @@
-// app/dashboard/page.tsx
 'use client';
 
-import MainApp from '@/components/MainApp';  // Adjust the import path based on your file structure
+import React from 'react';
+import MainApp from '@/components/MainApp';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  return <MainApp />;
+  const router = useRouter();
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <MainApp />
+    </div>
+  );
 }

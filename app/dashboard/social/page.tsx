@@ -20,50 +20,27 @@ export default function SocialPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const storedUserData = sessionStorage.getItem('userData');
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-        
-        if (storedUserData && isLoggedIn === 'true') {
-          setUserData(JSON.parse(storedUserData));
-          
-          // If no tab is specified in URL, set default tab
-          if (!searchParams.get('tab')) {
-            const params = new URLSearchParams(window.location.search);
-            params.set('tab', 'input');
-            
-            // Convert entries() to array before iterating
-            const entries = Array.from(searchParams.entries());
-            for (const [key, value] of entries) {
-              if (key !== 'tab') {
-                params.set(key, value);
-              }
-            }
-            
-            router.push(`${window.location.pathname}?${params.toString()}`);
-          }
-        } else {
-          router.push('/auth');
-        }
-      } catch (error) {
-        console.error('Authentication check failed:', error);
+    const checkAuth = () => {
+      const storedUserData = sessionStorage.getItem('userData');
+      const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+      
+      if (storedUserData && isLoggedIn === 'true') {
+        setUserData(JSON.parse(storedUserData));
+      } else {
         router.push('/auth');
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
-
     checkAuth();
-  }, [router, searchParams]);
+  }, [router]);
 
   const handleLogout = () => {
-    try {
-      sessionStorage.clear();
-      router.push('/auth');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+    sessionStorage.clear();
+    router.push('/auth');
+  };
+
+  const handleReturnHome = () => {
+    router.push('/dashboard');
   };
 
   if (isLoading) {
@@ -87,14 +64,15 @@ export default function SocialPage() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Social Metrics</h1>
               <p className="text-muted-foreground">
-                Track and manage employee data and social impact metrics
+                Manage and monitor your social impact data
               </p>
             </div>
           </div>
           <SocialTabs 
             company={userData.company}
-            searchParams={searchParams}
             router={router}
+            searchParams={searchParams}
+            onReturnHome={handleReturnHome}
           />
         </div>
       </div>

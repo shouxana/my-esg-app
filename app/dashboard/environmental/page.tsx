@@ -1,4 +1,3 @@
-// app/environmental/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -40,6 +39,10 @@ export default function EnvironmentalPage() {
     router.push('/auth');
   };
 
+  const handleReturnHome = () => {
+    router.push('/dashboard');
+  };
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -69,6 +72,7 @@ export default function EnvironmentalPage() {
             company={userData.company}
             router={router}
             searchParams={searchParams}
+            onReturnHome={handleReturnHome}
           />
         </div>
       </div>

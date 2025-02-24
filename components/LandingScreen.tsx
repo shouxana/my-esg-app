@@ -17,14 +17,21 @@ interface LandingScreenProps {
 const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, onLogout }) => {
   const router = useRouter();
 
+  // Helper function to format name with proper capitalization
   const formatName = (name: string) => {
+    if (!name) return '';
     try {
-      return decodeURIComponent(escape(name));
+      // First decode from URI encoding if needed
+      const decodedName = decodeURIComponent(name);
+      // Format with first letter capitalized
+      return decodedName.charAt(0).toUpperCase() + decodedName.slice(1).toLowerCase();
     } catch {
-      return name;
+      // If decoding fails, just capitalize first letter
+      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
     }
   };
 
+  // Format both first and last names
   const formattedFirstName = userData?.user_name ? formatName(userData.user_name) : '';
   const formattedLastName = userData?.user_lastname ? formatName(userData.user_lastname) : '';
 
@@ -32,7 +39,6 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
     const selectedView = views.find(v => v.id === viewId);
     if (selectedView && !selectedView.isComingSoon) {
       onViewSelect(viewId);
-      // Update URL when selecting view from landing screen
       const params = new URLSearchParams(window.location.search);
       params.set('view', viewId);
       router.push(`${window.location.pathname}?${params.toString()}`);
@@ -149,9 +155,9 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
           })}
         </div>
 
-        <div className="mt-12 text-center text-sm text-slate-500">
+        {/* <div className="mt-12 text-center text-sm text-slate-500">
           <p>Reporting for: {userData?.company}</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

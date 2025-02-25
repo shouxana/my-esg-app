@@ -115,7 +115,7 @@ const EnvironmentalDataInput: React.FC<EnvironmentalDataInputProps> = ({ company
     );
     XLSX.utils.book_append_sheet(wb, vehicleTypesSheet, 'Vehicle Types');
   
-    XLSX.writeFile(wb, `fleet_template_${company}.xlsx`);
+    XLSX.writeFile(wb, `fleet_template.xlsx`);
   };
 
 

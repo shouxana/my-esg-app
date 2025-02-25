@@ -18,16 +18,16 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onViewSelect, userData, o
   const router = useRouter();
 
   // Helper function to format name with proper capitalization
-  const formatName = (name: string) => {
-    if (!name) return '';
+  const formatName = (user_name: string) => {
+    if (!user_name) return '';
     try {
       // First decode from URI encoding if needed
-      const decodedName = decodeURIComponent(name);
+      const decodedName = decodeURIComponent(user_name);
       // Format with first letter capitalized
       return decodedName.charAt(0).toUpperCase() + decodedName.slice(1).toLowerCase();
     } catch {
       // If decoding fails, just capitalize first letter
-      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+      return user_name.charAt(0).toUpperCase() + user_name.slice(1).toLowerCase();
     }
   };
 

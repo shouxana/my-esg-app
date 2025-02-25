@@ -1066,7 +1066,7 @@ useEffect(() => {
     XLSX.utils.book_append_sheet(wb, managerialPositionsSheet, 'Managerial Positions');
   
     // Write the file
-    XLSX.writeFile(wb, `employee_template_${company}.xlsx`);
+    XLSX.writeFile(wb, `employee_template.xlsx`);
   };
   
 

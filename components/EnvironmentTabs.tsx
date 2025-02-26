@@ -355,7 +355,7 @@ const uploadFile = async (file: File, currentTab: string) => {
       <div className="flex items-center gap-4">
         <Button
           onClick={() => document.getElementById('pdf-upload')?.click()}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white"
           disabled={isUploading}
         >
           <Upload className="mr-2 h-4 w-4" />

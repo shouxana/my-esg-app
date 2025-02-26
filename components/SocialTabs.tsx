@@ -379,7 +379,7 @@ const handleTabChange = (tab: 'input' | 'visuals' | 'pdfs') => {
       <div className="flex items-center gap-4">
         <Button
           onClick={() => document.getElementById('pdf-upload')?.click()}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 text-white" 
           disabled={isUploading}
         >
           <Upload className="mr-2 h-4 w-4" />

@@ -66,7 +66,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
   }>>([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'chart' | 'data' | 'trend'>('chart');
+  const [viewMode, setViewMode] = useState<'chart' | 'data' | 'trend'>('trend');
   const [detailedData, setDetailedData] = useState<DetailedEmployeeData[]>([]);
   const [isDetailedDataLoading, setIsDetailedDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -280,7 +280,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
           <div className="flex items-center gap-5">
             {/* Toggle Buttons Group */}
             <div className="bg-white border border-gray-200 p-0.5 rounded-lg flex shadow-sm">
-              <button
+              {/* <button
                 onClick={() => setViewMode('chart')}
                 className={`
                   relative px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 
@@ -291,7 +291,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
                 `}
               >
                 Bar Chart
-              </button>
+              </button> */}
               <button
                 onClick={() => setViewMode('trend')}
                 className={`
@@ -302,7 +302,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
                   }
                 `}
               >
-                Trend
+                Trend View
               </button>
               <button
                 onClick={() => setViewMode('data')}
@@ -315,7 +315,7 @@ const GenderDistributionChart: React.FC<GenderDistributionChartProps> = ({ years
                 `}
               >
                 <Table className="h-4 w-4" />
-                Details
+                Detailed View
               </button>
             </div>
 
